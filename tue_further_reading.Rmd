@@ -1,0 +1,17 @@
+---
+output: html_document
+---
+
+# Further reading
+
+1. Meyer, C., Kreft, H., Guralnick, R.P. & Jetz, W. (2015). Global priorities for an effective information basis of biodiversity distributions. Nat. Commun., 6, 8221
+
+2. Maldonado, C., Molina, C.I., Zizka, A., Persson, C., Taylor, C.M., Albán, J., Chilquillo, E., Rønsted, N. and Antonelli, A. (2015), Species diversity and distribution in the era of Big Data. Global Ecology and Biogeography, 24: 973-984. https://doi.org/10.1111/geb.12326
+
+3.  Zizka, A, Silvestro, D, Andermann, T, et al. CoordinateCleaner: Standardized cleaning of occurrence records from biological collection databases. Methods Ecol Evol. 2019; 10: 744– 751. https://doi.org/10.1111/2041-210X.13152 
+
+4. Zizka A, Antunes Carvalho F, Calvente A, Rocio Baez-Lizarazo M, Cabral A, Coelho JFR, Colli-Silva M, Fantinati MR, Fernandes MF, Ferreira-Araújo T, Gondim Lambert Moreira F, Santos NMC, Santos TAB, dos Santos-Costa RC, Serrano FC, Alves da Silva AP, de Souza Soares A, Cavalcante de Souza PG, Calisto Tomaz E, Vale VF, Vieira TL, Antonelli A. 2020. No one-size-fits-all solution to clean GBIF. PeerJ 8:e9916 https://doi.org/10.7717/peerj.9916
+
+5. Zizka, A., Antonelli, A. and Silvestro, D. (2021), sampbias, a method for quantifying geographic sampling biases in species distribution data. Ecography, 44: 25-32. https://doi.org/10.1111/ecog.05102
+
+6. Daru, B.H., Park, D.S., Primack, R.B., Willis, C.G., Barrington, D.S., Whitfeld, T.J.S., Seidler, T.G., Sweeney, P.W., Foster, D.R., Ellison, A.M. and Davis, C.C. (2018), Widespread sampling biases in herbaria revealed from large‐scale digitization. New Phytol, 217: 939-955. https://doi.org/10.1111/nph.14855

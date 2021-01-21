@@ -1,0 +1,13 @@
+---
+output: html_document
+---
+
+# Further reading
+
+1. Daniel Edler, Thaís Guedes, Alexander Zizka, Martin Rosvall, Alexandre Antonelli, Infomap Bioregions: Interactive Mapping of Biogeographical Regions from Species Distributions, Systematic Biology, Volume 66, Issue 2, March 2017, Pages 197–204, https://doi.org/10.1093/sysbio/syw087
+
+2. Daru, BH, Karunarathne, P, Schliep, K. phyloregion: R package for biogeographical regionalization and macroecology. Methods Ecol Evol. 2020; 11: 1483– 1491. https://doi.org/10.1111/2041-210X.13478
+
+3. Nicholas J. Matzke, Model Selection in Historical Biogeography Reveals that Founder-Event Speciation Is a Crucial Process in Island Clades, Systematic Biology, Volume 63, Issue 6, November 2014, Pages 951–970, https://doi.org/10.1093/sysbio/syu056
+
+4. Ree, RH, Sanmartín, I. Conceptual and statistical problems with the DEC+J model of founder‐event speciation and its comparison with DEC via model selection. J Biogeogr. 2018; 45: 741– 749. https://doi.org/10.1111/jbi.13173 

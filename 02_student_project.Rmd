@@ -1,0 +1,17 @@
+---
+output: html_document
+---
+
+During the course you work on your own project by applying the course methods to a datset related to your own research. You can put the focus of the project yourself and pick those methods from the course that are most relevant to your own resaerch. On Monday we will have a session to discuss your idea with a peer and to get feedback from Alex and Daniele, but best give it some idea before the course start already. You will need to chose an example taxon and/or region to work on. Your focus group should fill the following criteria so you can feasible work on it during the course. 
+
+Please think of a group that fulfils the following criteria
+
+- contains between 100-500 species
+
+- The majority of species distributed on teh continental scale or below (avoid osmopolite species)
+
+- You have a dated phylogenetic tree available, or the group is included in publicly available large scale phylogenies (i.e. birds, mammals, amphibians, flowering plants)
+
+- There is a reasonable number of species with an IUCN assessment in this group, or in a higher level taxon (e.g. if you chose a set of species, there should be assessments available for the family)
+
+If you can, please prepare a list of species (if that is not possible, we can do this during the course)

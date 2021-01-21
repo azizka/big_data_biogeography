@@ -1,0 +1,70 @@
+name: big_data_biogeography
+output_dir: docs
+navbar:
+  title: Big Data Biogeography
+  type: inverse
+  left:
+  - text: Home
+    icon: fa-home 
+    href: Readme.html
+  - text: Course schedule
+    href: 01_schedule.html
+  - text: Student project
+    href: 02_student_project.html
+  - text: Day 1
+    menu:
+      - text: Setup
+        href: mo_setup.html
+      - text: Download from GBIF
+        href: mo_download_gbif.html
+      - text: Download from Paleobiology database
+        href: mo_download_paleobioDB.html
+      - text: Download from IUCN database
+        href: mo_download_iucn.html
+  - text: Day 2
+    menu:
+    - text: 1. Cleaning geographic records from public databases
+      href: tue_clean_geographic_data.html
+    - text: 2. Cleaning fossil data
+      href: tue_clean_fossils.html
+    - text: 3. Probabilistic cleaning with bRacatus
+      href: tue_probabilistic_cleaning.html
+    - text: 4. Quantifying sampling bias
+      href: tue_sampling_bias.html
+    - text: 5. Species richness and range size
+      href: tue_species_richness_range_size.html
+    - text: Further reading
+      href: tue_further_reading
+  - text: Day 3
+    menu:
+    - text: 1. Taxon-specific bioregionalization
+      href: wed_taxonspecific_bioregionalization.html  
+    - text: 2. Reconstructing ancestral areas (DEC)
+      href: wed_ancestral_areas_DEC.html
+    - text: 3. Estimating the number of shifts (DEC BSM)
+      href: wed_DEC_bsm.html
+    - text: 4. Diversification rate estimation (GeoSSE)
+      href: wed_diversification_rates_geosse.html
+    - text: Further reading
+      href: wed_further_reading
+  - text: Day 4
+    menu:
+    - text: 1. Automated conservation assessments IUCN Criterion B
+      href: thu_aa_criterion_B.html
+    - text: 2. Automated assessments using Neural Networks
+      href: thu_aa_neural_network.html
+    - text: Further reading
+      href: thu_further_reading
+  - text: Day 5
+    menu:
+    - text: Student presentations
+      href: fr_presentations.html
+
+  right:
+  - text: GitHub
+    href: https://github.com/idiv-biodiversity/2019_big_data_biogeography
+  
+output:
+  html_document:
+    lib_dir: site_libs
+    self_contained: no

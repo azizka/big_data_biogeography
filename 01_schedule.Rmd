@@ -1,0 +1,134 @@
+---
+title: "01_schedule"
+author: "Alexander Zizka"
+date: "1/21/2021"
+output: html_document
+---
+
+The five days of this course are split in a synchronous block with live lectures, software demonstrations and small guided exercises and an asynchronous block with exercises you can do individually or in small groups. The synchronous part will take place every day between 13:00-17:00 CET. You can do the exercises of the asynchronous block at anytime, ideally the same day after the lectures, if your time zone allows. Alex and Daniele will be available on slack to answer questions on the asynchronous part every day from 09:00-12:00 CET. 
+
+# Before the course
+
+- Registration at www.gbif.org and www.iucnredlist.org
+
+- Software installation (R, Rstudio, Python)
+
+- Preparation of study group & project
+
+- Course literature
+
+# Day 1 - Biodiversity databases
+
+Lectures (live)
+
+- Welcome & Introduction 
+
+- Lecture "Recent developments in big data biogeography" 
+
+- Student projects
+
+- Lecture & Hand-on Biodiversity databases
+
+- Hands-on "Obtaining biodiversity data in R"
+
+
+Exercises (asynchronous):
+
+1. Help with software set up
+
+2. Obtaining data from GBIF in R
+
+3. Obtaining data from PaleoDB in R
+
+4. Obtaining data from the IUCN red list in R
+
+
+# Day 2 - Recent biogeography
+
+Lectures (live)
+
+- Questions from yesterday/ 
+
+- Lecture "Data quality and sampling bias"
+
+- Demonstration
+
+- Lecture "Bracatus: a method for probabilistic quality assessment of biogeographic records (Eduardo, 30 min)
+
+- Demonstration
+
+
+Exercises (asynchronous)
+
+1. Cleaning geographic records from public databases
+
+2. Cleaning fossil data
+
+3. Probabilistic cleaning with Bracatus
+
+4. Quantifying sampling bias in datasets of occurrence records
+
+5. Species richness and range size
+
+
+# Day 3 - Historical Biogeography 
+
+Lectures (live)
+
+- Lecture "Data driven bioregionalization"
+
+- Demonstration
+
+- Lecture “Historical biogeography – methods to model the evolution of geographic ranges through time”
+
+- Demonstration BiogeogrBEARS/ DEC
+
+
+Exercises (asynchronous)
+
+1. Taxon-specific bioregionalization: Infomap Bioregions & phyloregion
+
+2. Reconstructing ancestral areas (DEC)
+
+3. Estimating the number of shifts (DEC BSM)
+
+4. Diversification rate estimation (GeoSSE)
+
+
+# Day 4 - Conservation assessments 
+
+Lectures (live)
+
+- Lecture "IUCN conservation assessments/automated assessments"
+
+- Lecture "Classification and neural networks"
+
+- Demonstration "Automated assessments following IUCN Criterion B"
+
+- Demonstration "Automated assessments using Neural networks (IUCNN)
+
+
+Exercises (asynchronous)
+
+1. Automated conservation assessments following criterion B (rCat/ConR)
+
+2. Automated conservation assessments using neural networks
+
+
+# Day 5 - Wrap up and project work 
+
+Lectures (live)
+
+- Student presentations (7-10 minutes each)
+
+- Wrap up and course evaluation
+
+
+Exercises (asynchronous)
+
+1. Time to catch up
+
+2. Work on project & presentation preparation
+
+
+
