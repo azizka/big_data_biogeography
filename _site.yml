@@ -62,7 +62,7 @@ navbar:
 
   right:
   - text: GitHub
-    href: https://github.com/idiv-biodiversity/2019_big_data_biogeography
+    href: https://github.com/azizka/big_data_biogeography
   
 output:
   html_document:

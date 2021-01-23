@@ -1,7 +1,5 @@
 ---
-title: "01_schedule"
-author: "Alexander Zizka"
-date: "1/21/2021"
+title: Course schedule
 output: html_document
 ---
 
