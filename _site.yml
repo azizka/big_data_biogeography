@@ -13,6 +13,8 @@ navbar:
     href: 02_student_project.html
   - text: Day 1
     menu:
+      - text: Overview
+        href: mo_overview.html
       - text: Setup
         href: mo_setup.html
       - text: Download from GBIF
@@ -23,6 +25,8 @@ navbar:
         href: mo_download_iucn.html
   - text: Day 2
     menu:
+    - text: Overview
+      href: tue_overview.html
     - text: 1. Cleaning geographic records from public databases
       href: tue_clean_geographic_data.html
     - text: 2. Cleaning fossil data
@@ -37,6 +41,8 @@ navbar:
       href: tue_further_reading
   - text: Day 3
     menu:
+    - text: Overview
+      href: wed_overview.html
     - text: 1. Taxon-specific bioregionalization
       href: wed_taxonspecific_bioregionalization.html  
     - text: 2. Reconstructing ancestral areas (DEC)
@@ -49,6 +55,8 @@ navbar:
       href: wed_further_reading
   - text: Day 4
     menu:
+    - text: Overview
+      href: thu_overview.html
     - text: 1. Automated conservation assessments IUCN Criterion B
       href: thu_aa_criterion_B.html
     - text: 2. Automated assessments using Neural Networks
@@ -57,6 +65,8 @@ navbar:
       href: thu_further_reading
   - text: Day 5
     menu:
+    - text: Overview
+      href: fr_overview.html
     - text: Student presentations
       href: fr_presentations.html
 

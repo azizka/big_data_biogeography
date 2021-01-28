@@ -1,0 +1,44 @@
+---
+title: "Day 4 - Overview"
+output: html_document
+---
+
+# Learning objectives
+After this day you will be able to:
+
+1. Batch generate preliminary conservation assessments for many species following IUCN Criterion B using automated software tools
+
+2. Understand the value of neural networks for overcoming shortfalls 
+
+3. Estimate species IUCN conservation status for a group of Not evaluated species using neural networks and geo-referenced species occurrences in R
+
+# Detailed schedule
+
+### Lectures (live)
+13:15 - 14:00
+- Lecture "IUCN conservation assessments/automated assessments"
+
+14:00 - 15:00
+- Lecture "Classification and neural networks"
+
+15:00-17:00
+- Demonstration "Automated assessments following IUCN Criterion B"
+- Demonstration "Automated assessments using Neural networks
+
+
+### Exercises (asynchronous)
+1. Automated conservation assessments following Criterion B (rCat/ConR)
+
+2. Automated conservation assessments using neural networks (IUC-NN)
+
+
+# Exercise outcome
+A the end of this day, you will have produced the following files for your group of interest:
+
+1. A .txt file with species conservation assessments following Criterion B for your group of interest
+
+2. .pdf files with maps and preliminary conservation status following Criterion B for the species in your group of interest
+
+3. A .txt file with predicted IUCN status for Not evaluated species from your group of interest 
+
+

@@ -305,6 +305,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="mo_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="mo_setup.html">Setup</a>
     </li>
     <li>
@@ -325,6 +328,9 @@ $(document).ready(function () {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="tue_overview.html">Overview</a>
+    </li>
     <li>
       <a href="tue_clean_geographic_data.html">1. Cleaning geographic records from public databases</a>
     </li>
@@ -353,6 +359,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="wed_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="wed_taxonspecific_bioregionalization.html">1. Taxon-specific bioregionalization</a>
     </li>
     <li>
@@ -377,6 +386,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="thu_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="thu_aa_criterion_B.html">1. Automated conservation assessments IUCN Criterion B</a>
     </li>
     <li>
@@ -395,6 +407,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="fr_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="fr_presentations.html">Student presentations</a>
     </li>
   </ul>
@@ -402,7 +417,7 @@ $(document).ready(function () {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/idiv-biodiversity/2019_big_data_biogeography">GitHub</a>
+  <a href="https://github.com/azizka/big_data_biogeography">GitHub</a>
 </li>
       </ul>
     </div><!--/.nav-collapse -->
@@ -490,9 +505,9 @@ save(ana_events_tables, file = &quot;example_data/bombacoideae_BSMana_events_tab
 <pre class="r"><code>angen &lt;- lapply(ana_events_tables, function(k) {
     out &lt;- k %&gt;% dplyr::select(abs_event_time, event_type, event_txt, dispersal_to) %&gt;% mutate(bin = cut(abs_event_time, 
         breaks = seq(24, 0, by = -2), labels = rev(seq(23, 1, by = -2)))) %&gt;% mutate(from = str_split_fixed(event_txt, 
-        n = 2, pattern = &quot;-&gt;&quot;)[, 1]) %&gt;% mutate(sdb_efb = ifelse(!grepl(&quot;W&quot;, from) &amp; grepl(&quot;W&quot;, dispersal_to), 
-        1, 0)) %&gt;% mutate(efb_sdb = ifelse(from == &quot;W&quot; &amp; (grepl(&quot;D&quot;, dispersal_to) | grepl(&quot;S&quot;, dispersal_to)), 
-        1, 0))
+        n = 2, pattern = &quot;-&gt;&quot;)[, 1]) %&gt;% mutate(sdb_efb = ifelse(!grepl(&quot;W&quot;, from) &amp; grepl(&quot;W&quot;, dispersal_to), 1, 
+        0)) %&gt;% mutate(efb_sdb = ifelse(from == &quot;W&quot; &amp; (grepl(&quot;D&quot;, dispersal_to) | grepl(&quot;S&quot;, dispersal_to)), 1, 
+        0))
     return(out)
 })
 
@@ -508,8 +523,8 @@ cladgen &lt;- lapply(clado_events_tables, function(k) {
 <h1>Count the number of shifts per time bin</h1>
 <p>Again you may need to adapt the maximum age and the number of areas.</p>
 <pre class="r"><code>disps &lt;- lapply(angen, function(k) {
-    out &lt;- k %&gt;% filter(event_type == &quot;d&quot;) %&gt;% group_by(bin, dispersal_to) %&gt;% summarize(abs_count = n()) %&gt;% 
-        ungroup() %&gt;% mutate(bin = parse_number(as.character(bin)))
+    out &lt;- k %&gt;% filter(event_type == &quot;d&quot;) %&gt;% group_by(bin, dispersal_to) %&gt;% summarize(abs_count = n()) %&gt;% ungroup() %&gt;% 
+        mutate(bin = parse_number(as.character(bin)))
     
     fram &lt;- expand_grid(bin = rev(seq(23, 1, by = -2)), dispersal_to = c(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;, &quot;E&quot;))
     out &lt;- left_join(fram, out, by = c(&quot;dispersal_to&quot;, &quot;bin&quot;)) %&gt;% replace_na(list(abs_count = 0))
@@ -549,8 +564,8 @@ brls &lt;- data.frame(milgaps_mod) %&gt;% mutate(time = time - 1)</code></pre>
 <h1>Normalize the number of shifts by the total amount of branch length per time bin</h1>
 <pre class="r"><code>disps &lt;- left_join(disps, brls, by = c(bin = &quot;time&quot;)) %&gt;% mutate(lower = lower/tot_brl) %&gt;% mutate(mean = mean/tot_brl) %&gt;% 
     mutate(upper = upper/tot_brl)</code></pre>
-<pre class="r"><code>ggplot() + geom_point(data = disps, aes(x = bin, y = mean, color = dispersal_to)) + geom_line(data = disps, 
-    aes(x = bin, y = mean, color = dispersal_to)) + theme_bw()</code></pre>
+<pre class="r"><code>ggplot() + geom_point(data = disps, aes(x = bin, y = mean, color = dispersal_to)) + geom_line(data = disps, aes(x = bin, 
+    y = mean, color = dispersal_to)) + theme_bw()</code></pre>
 </div>
 
 

@@ -1,0 +1,39 @@
+---
+title: "Day 5 - Overview"
+output: html_document
+---
+
+# Learning objectives
+After this day you will be able to:
+
+1. Explain the limits of biogeography using recent distribution data and phylogenies
+
+2. Understand the relevance of fossil for biogeography and the foundations of new methods to infer biogeographic processes from fossils
+
+3. Relate the approaches learned during this course to your own research and present the results to a mixed scientific audience
+
+# Detailed schedule
+
+### Lectures (live)
+13:15 - 14:00
+- Lecture: Fossil biogeography (DES, fossilBM)
+
+14:00 - 16:30
+- Student presentations (7 minutes each)
+
+16:30 -17:00 
+- Wrap up and course evaluation
+
+
+### Exercises (asynchronous)
+1. Work on focus group & time to catch up on exercises from previous days
+
+2. Work on project & presentation preparation
+
+
+# Exercise outcome
+A the end of this day, you will have produced the following files for your group of interest:
+
+1. A presentation of the results obtained during the course and their relevance for your focus groups and research approaches
+
+

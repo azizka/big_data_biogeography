@@ -1,0 +1,39 @@
+---
+title: "Day 2 - Overview"
+output: html_document
+---
+
+# Learning objectives
+After this day you will be able to:
+
+1. Judge the quality of geo-referenced species occurrences obtained from public databases for downstream analyses in biogeography and conservation
+
+2. Improve the reliability of datasets of geo-referenced occurrences using automated algorithms and software in R
+
+3. Quantify the effect of geographic sampling bias in a datasets of geo-referenced occurrences
+
+4. Generate summary visualizations of species richness including species richness maps.
+
+# Detailed schedule
+
+### Lectures (live)
+13:15 - 15:00
+- Lecture "Data quality and sampling bias"
+- Demonstration + hands on in break out rooms 
+
+15:00 - 17:00
+- Lecture "Bracatus: a method for probabilistic quality assessment of biogeographic records
+- Demonstration
+
+### Exercises (asynchronous)
+
+# Exercise outcome
+A the end of this day, you will have produced the following files for your group of interest, which you will use during the exercises during the next days:
+
+1. A .csv file with cleaned occurrence records based on threshold filtering
+
+2. A .csv file with probabilistic estimates of records correctness and biogeographic status 
+
+3. Two figures quantifying the effect of sampling bias in your dataset of occurrence records
+
+4. A figure with the distribution of species richness in your group of interest

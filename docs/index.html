@@ -303,6 +303,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="mo_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="mo_setup.html">Setup</a>
     </li>
     <li>
@@ -323,6 +326,9 @@ $(document).ready(function () {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="tue_overview.html">Overview</a>
+    </li>
     <li>
       <a href="tue_clean_geographic_data.html">1. Cleaning geographic records from public databases</a>
     </li>
@@ -351,6 +357,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="wed_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="wed_taxonspecific_bioregionalization.html">1. Taxon-specific bioregionalization</a>
     </li>
     <li>
@@ -375,6 +384,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="thu_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="thu_aa_criterion_B.html">1. Automated conservation assessments IUCN Criterion B</a>
     </li>
     <li>
@@ -393,6 +405,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="fr_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="fr_presentations.html">Student presentations</a>
     </li>
   </ul>
@@ -400,7 +415,7 @@ $(document).ready(function () {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/idiv-biodiversity/2019_big_data_biogeography">GitHub</a>
+  <a href="https://github.com/azizka/big_data_biogeography">GitHub</a>
 </li>
       </ul>
     </div><!--/.nav-collapse -->
@@ -425,23 +440,35 @@ $(document).ready(function () {
 </ul>
 <p>Location: on-line</p>
 <p>Teachers: Alexander Zizka, German Center for Integrative Biodiversity research &amp; Daniele Silvestro, University of Fribourg, Switzerland</p>
+<div id="schedule" class="section level2">
+<h2>Schedule</h2>
+<p>The course consists of five days with different topics. You can find a detailed schedule in the overview tab for each day.</p>
+<ul>
+<li><p>Day 1 - Biodiversity databases. Introduction to different types of large-scale biodiversity data and methods for reproducible data retrieval.</p></li>
+<li><p>Day 2 - Data quality and processing. Understanding common issues with species distribution data from large-scale biodiversity databases and introduction to methods to address them.</p></li>
+<li><p>Day 3 - Historical biogeography</p></li>
+<li><p>Day 4 - Big data conservation assessment</p></li>
+<li><p>Day 5 - Fossil biogeography</p></li>
+</ul>
+</div>
 <div id="important" class="section level2">
 <h2>Important</h2>
 <p>We will use Slack for most of the communication before and during the course. Please make sure to check the slack channel regularly.</p>
 </div>
-<div id="before-the-course" class="section level2">
-<h2>Before the course</h2>
+<div id="how-the-course-works" class="section level2">
+<h2>How the course works</h2>
 <ul>
-<li><p>Create an account at www.gbif.org</p></li>
-<li><p>Create and account at www.iucnredlist.org. On day 4 we will use R to obtain IUCN Red List assessments via an API. If IUCN assessments are of interest for you, and want to do the exercise, please request an iucnredlist API token. You can do so by logging into your account at www.iucnredlist.org, and navigate to API access. <em>This may take some time, please do it as soon as possible</em>.</p></li>
-<li><p>Install the current version of R and RStudio on your computer</p></li>
-<li><p>Read the course literature listed below.</p></li>
-<li><p>Please prepare 3 minutes (1 slide) to present yourself and your research. Please make sure to answer the following questions:</p>
-<ol style="list-style-type: lower-alpha">
-<li>Where are you from?</li>
-<li>What is your research about?</li>
-<li>What are your expectations for this course?</li>
-</ol></li>
+<li><p>We will meet for the first time on Monday 13:00 CET on zoom. Please make sure to have a look at the before_start slack channel, so that we can start swiftly.</p></li>
+<li><p>The course will be split into daily live sessions (13:00 - 17:00 CET) and related asynchronous exercise session on which you will work between the live sessions. You can chose the timing of the exercise sessions, and we will be available to answer questions via slack from 9:00 - 12:00 CET every day.</p></li>
+<li><p>During the live session we will consist of <em>lectures</em> where we will present theoretical concepts and a broader context for the exercises of each day and <em>demonstrations</em> where we will briefly present the analysis work-flows for each day and you will then have time to explore them and ask questions. During the asynchronous sessions you will independently address specific <em>exercises</em> following tutorials.</p></li>
+<li><p>Detailed information on the course are available on the course webpage (<a href="https://azizka.github.io/big_data_biogeography/" class="uri">https://azizka.github.io/big_data_biogeography/</a>) which we will update constantly during the course. On the webpage you will find for each day:</p>
+<ul>
+<li>the exercises with tutorial</li>
+<li>a detailed schedule</li>
+<li>learning objectives and expected outcomes</li>
+<li>further reading</li>
+</ul></li>
+<li><p>During the course you will work on your own project, applying the methods presented during the course to your own data. To do so please bring a taxonomic group of interest (ideally up to 200 species, and if possible with a phylogeny available), and think of some questions regarding this dataset that you would like to answer. This will give you the opportunity to chose questions and exercises most suitable for your work and get feedback from the teacher. There will be example data for all exercises, in case you do not have your own data yet. At the end of the course you will briefly present your results. You can find more information on the project on the <a href="https://azizka.github.io/big_data_biogeography/">course webpage</a>.</p></li>
 </ul>
 </div>
 <div id="contact" class="section level2">
@@ -462,10 +489,6 @@ $(document).ready(function () {
 <div id="background" class="section level2">
 <h2>Background</h2>
 <p>The public availability of large-scale species distribution data has increased drastically over the last ten years. In particular, due to the aggregation of records from museums and herbaria, and citizen science in public databases such as the Global Biodiversity Information Facility (GBIF). This is leading to a ‘big data’ revolution in biogeography, which holds an enormous but still poorly explored potential for understanding large scale patterns and drivers of biodiversity in space and time.</p>
-</div>
-<div id="project-assignment" class="section level2">
-<h2>Project assignment</h2>
-<p>During the course you will analyse a specific dataset. We strongly encourage you to bring your own data (Taxon or region of interest, phylogenetic tree, fossil data), which will give you the opportunity to chose questions and exercises most suitable for your work. If necessary we will provide example data during the course as well.</p>
 </div>
 <div id="course-literature" class="section level2">
 <h2>Course literature</h2>

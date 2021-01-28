@@ -305,6 +305,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="mo_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="mo_setup.html">Setup</a>
     </li>
     <li>
@@ -325,6 +328,9 @@ $(document).ready(function () {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="tue_overview.html">Overview</a>
+    </li>
     <li>
       <a href="tue_clean_geographic_data.html">1. Cleaning geographic records from public databases</a>
     </li>
@@ -353,6 +359,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="wed_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="wed_taxonspecific_bioregionalization.html">1. Taxon-specific bioregionalization</a>
     </li>
     <li>
@@ -377,6 +386,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="thu_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="thu_aa_criterion_B.html">1. Automated conservation assessments IUCN Criterion B</a>
     </li>
     <li>
@@ -395,6 +407,9 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="fr_overview.html">Overview</a>
+    </li>
+    <li>
       <a href="fr_presentations.html">Student presentations</a>
     </li>
   </ul>
@@ -402,7 +417,7 @@ $(document).ready(function () {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/idiv-biodiversity/2019_big_data_biogeography">GitHub</a>
+  <a href="https://github.com/azizka/big_data_biogeography">GitHub</a>
 </li>
       </ul>
     </div><!--/.nav-collapse -->
@@ -458,9 +473,9 @@ tipranges = getranges_from_LagrangePHYLIP(lgdata_fn = geogfn)</code></pre>
 <h2>Set up the DEC model</h2>
 <pre class="r"><code>BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 
-# set the macimum number of areas. If you ahve many areas, you can set the amximum number of areas a species
-# can occur in simultaneously. One possibility is to set this to the number of areas of the most widespread
-# recent species.
+# set the macimum number of areas. If you ahve many areas, you can set the amximum number of areas a species can
+# occur in simultaneously. One possibility is to set this to the number of areas of the most widespread recent
+# species.
 max_range_size = 5
 numstates_from_numareas(numareas = 5, maxareas = 5, include_null_range = TRUE)
 
@@ -520,8 +535,8 @@ row.names(range_probabilities) = trtable$node
 names(range_probabilities) = ranges_list
 
 # Write the table to a tab-delimited text file (for Excel etc.)
-write.table(range_probabilities, file = &quot;example_data/bombacoideae_DEC_node_probabilities.txt&quot;, row.names = F, 
-    quote = FALSE, sep = &quot;\t&quot;)</code></pre>
+write.table(range_probabilities, file = &quot;example_data/bombacoideae_DEC_node_probabilities.txt&quot;, row.names = F, quote = FALSE, 
+    sep = &quot;\t&quot;)</code></pre>
 </div>
 <div id="visualization" class="section level2">
 <h2>Visualization</h2>
@@ -533,8 +548,8 @@ results_object = resDEC
 scriptdir = np(system.file(&quot;extdata/a_scripts&quot;, package = &quot;BioGeoBEARS&quot;))
 
 # A plot of ancestral states
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params = list(&quot;j&quot;), plotwhat = &quot;text&quot;, 
-    label.offset = 2, tipcex = 0.7, statecex = 0.6, splitcex = 0.6, titlecex = 0.8, plotsplits = F, cornercoords_loc = scriptdir, 
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params = list(&quot;j&quot;), plotwhat = &quot;text&quot;, label.offset = 2, 
+    tipcex = 0.7, statecex = 0.6, splitcex = 0.6, titlecex = 0.8, plotsplits = F, cornercoords_loc = scriptdir, 
     include_null_range = TRUE, tr = tr, tipranges = tipranges, plotlegend = T)
 
 # showing pie charts for each node with the probabilities

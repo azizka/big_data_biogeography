@@ -1,0 +1,50 @@
+---
+title: "Day 1 - Overview"
+output: html_document
+---
+
+# Learning objectives
+After the end of this day, you will be able to 
+
+1. Identify the primary public source to obtain different types of biodiversity data
+
+2. Describe the structure, strengths and weaknesses of three major biodiversity databases to students and collaborators
+
+3. Obtain data on species geographic occurrences, fossil occurrences and information on species conservation status in a reproducible and documented way using R.
+
+# Detailed schedule
+### Lectures (live)
+
+13:00 - 13:30h 
+  - Welcome & Introduction
+
+13:30 - 15:00 
+  - Lecture "Recent developments in big data biogeography"
+
+15:00 - 15:30 
+  - Discussion and submission of student projects
+
+15:30 - 16:15 
+  - Lecture & Hand-on Biodiversity databases
+
+16:15 - 17:00
+  - Hands-on "Obtaining biodiversity data in R" 
+
+### Exercises (asynchronous):
+
+1. Help with software set up
+
+2. Obtaining data from GBIF in R
+
+3. Obtaining data from PaleoDB in R
+
+4. Obtaining data from the IUCN red list in R
+
+# Exercise outcome
+A the end of this day, you will have produced the following files for your group of interest, which you will use during the exercises during the next days:
+
+1. A .csv file with species geographic occurrences of species
+
+2. A .csv file with fossil occurrences
+
+3. A .csv files of species conservation status from IUCN.

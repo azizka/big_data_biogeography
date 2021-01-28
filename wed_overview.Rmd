@@ -1,0 +1,49 @@
+---
+title: "Day 3 - Overview"
+output: html_document
+---
+
+# Learning objectives
+After this day you will be able to:
+
+1. Generate axon-specific bioregions using innovative methods based on network connectivity and dissimilarity
+
+2. Assign species to geographic regions using geo-referenced point occurrences
+
+3. Reconstruct species ancestral ranges using the DEC model in R 
+
+4. Present estimates of area-specific diversification rates, based on State Specific Speciation and Extinction models (SSE)
+
+# Detailed schedule
+
+### Lectures (live)
+13:15 - 14:00
+- Lecture “Historical biogeography – methods to model the evolution of geographic ranges through time”
+
+14:00 - 14:30
+- Lecture "Data driven bioregionalization"
+
+14:30 - 17:00
+- Demonstration Bioregionalization
+- Demonstration modelling geographic ranges
+
+### Exercises (asynchronous)
+1. Taxon-specific bioregionalization: Infomap Bioregions & phyloregion
+
+2. Reconstructing ancestral areas (DEC)
+
+3. Estimating the number of shifts (DEC BSM)
+
+4. Diversification rate estimation (GeoSSE)
+
+
+# Exercise outcome
+A the end of this day, you will have produced the following files for your group of interest, which you will use during the exercises during the next days:
+
+1. .shp and .jpg files of a taxon specific bioregionalization for your group of interest
+
+2. A .txt file with a table assigning species to biogeographic regions in the format necessary to run BioGeoBEARS
+
+3. .rda and .pdf files with the results of the ancestral area reconstruction for your group of interest
+
+
