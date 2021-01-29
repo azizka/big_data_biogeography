@@ -27,6 +27,12 @@ After this day you will be able to:
 
 ### Exercises (asynchronous)
 
+1. Cleaning geographic and fossil records (optional) from public databases
+2. Quantifying sampling bias in datasets of occurrence records
+3. Probabilistic cleaning with Bracatus
+4. Species ranges and richness
+
+
 # Exercise outcome
 A the end of this day, you will have produced the following files for your group of interest, which you will use during the exercises during the next days:
 

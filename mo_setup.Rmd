@@ -22,6 +22,7 @@ install.packages(c(
   "rgdal",
   "rgbif",
   "ConR",
+  "rCat",
   "rredlist",
   "jsonlite",
   "rgeos",
@@ -39,7 +40,8 @@ install.packages(c(
   "jpeg",
   "coda", 
   "sm", 
-  "vioplot")
+  "vioplot",
+  "taxize")
 )
 
 library(devtools)
@@ -47,5 +49,6 @@ library(devtools)
 install_github("ropensci/CoordinateCleaner")
 install_github("azizka/speciesgeocodeR")
 install_github("azizka/sampbias")
+install_github("azizka/iucnn")
 install_github('nmatzke/BioGeoBEARS')
 ```

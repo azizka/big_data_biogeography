@@ -1,5 +1,90 @@
 ---
+title: "Sampling bias"
 output: html_document
 ---
 
-TBA
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval=FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+
+## Background
+Sampling effort is a critical measure for the reliability of present/absence projections from species occurrence data. However, dataset from publicly available databases based on biological collections are often comprised from various sources and compiled over large time periods and information on sampling effort is therefore most of the time unavailable. Physical accessibility of a region has been identified as major predictor of sampling effort, but this effect might vary among datasets. The SampBias package allows quantifying the effect of different anthropogenic structures (roads, airports, cities) on sampling in any given dataset based on geographic gazetteers. You can find a description of the methods here and tutorials on the use of SampBias [here](https://github.com/azizka/sampbias/wiki). **NOTE SampBias is only available as beta version**
+
+## Objectives
+After this exercise you will be able to 
+* quantify the effect of accessibility on the sampling pattern in species occurrence dataset
+* have an idea on political factors biasing data collection
+
+## Exercise
+Helpful functions for answering each question are given in the brackets. In case you want to get a feeling for the functionality of SampBias, without using are, you can find a GUI app here.
+
+1. Load the distribution data. (`read.csv`)
+2. Run sampbias with the default settings. (`SamplingBias`)
+3. Look at the run summary and visualize the results. How informative are the results? (`par, plot`)
+4. Explore `?SamplingBias` and try to change the relevant arguments to improve the results. Summarize and visualize again.
+5. Explore the relation of socio-economic factors in your group of interest using the Bio-Dem web-app https://bio-dem.surge.sh/
+
+
+## Possible questions for your research project
+* How biased is your collection dataset by accesability?
+* Which inffrastructure is most biasing?
+
+## Library setup
+You will need the following R libraries for this exercise, just copy the code chunk into you R console to load them. You might need to install some of them separately.
+
+```{r}
+library(tidyverse)
+library(sampbias)
+```
+
+
+# Tutorial
+
+## 1. Load the example distribution data from your data
+```{r, message = F, warning = F}
+occ <- read_csv("example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_malvaceae.csv")%>%
+  mutate(decimallongitude = decimalLongitude)%>%
+  mutate(decimallatitude = decimalLatitude)
+```
+
+## 2. Run sampbias with the default settings. (SamplingBias)
+A *sampbias* analysis is run in one line of code via the `calculate_bias` function. This may need some time. Make sure to chose a resolution suitable for the geographic extent of your data. You will see a warning if the resolution is too high causing unfeasible computation time.
+
+```{r}
+# run sampbias
+bias.out <- calculate_bias(x = occ, res = 1)
+
+#Summarize and visualize the results
+summary(bias.out)
+plot(bias.out)
+```
+
+In addition to the input from above, `calculate_bias` offers options to customize analyses, of which the most important ones are shown in Table 1. See `?calculate_bias` for a detailed description of all options, and the section "Changing default settings" of this tutorial for a description and examples for the "restricted sample" and "inp_raster" options. **It is of special importance to adapt the raster resolution to the extent of the study area via the `res` or `inp_raster` options.** 
+
+As the last step, it is possible to project the bias effects into space and map them to identify areas with particular high bias, for instance, to design future field campaigns (Fig. 2).
+
+```{r, fig.cap = "Sampling bias effect projected in space. Note the coarse grid resolution which should be increased."}
+proj <- project_bias(bias.out)
+map_bias(proj)
+```
+
+## 3. Look at the run summary and visualize the results. How informative are the results?
+```{r, message = F, warning = F}
+#summarize results
+summary(bias.out)
+
+#Visualize
+plot(bias.out)
+```
+
+## 4. Explore `?SamplingBias` and try to change the relevant arguments and the study extent to improve the results. Summarize and visualize again.
+```{r, message = F, warning = F, eval=F}
+?calculate_bias
+```
+
+## 5. Explore the Bio-Dem app to explore the effect of political factors on data collections in your group. 
+Have a look at http://bio-dem.surge.sh/ and use the app to explore the relation of socio-economic factors with the availability of occurrence records

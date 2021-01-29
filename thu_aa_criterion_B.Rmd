@@ -1,5 +1,128 @@
 ---
-output: html_document
+title: "AUtomated conservation assessment following Criterion B"
+output: 
+  html_document:
+    theme: readable
 ---
 
-TBA
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+# Background
+Species occurrence records can be used to approximate species ranges and generate preliminary conservation assessments. While comprehensive Red list assessments need a through case-by-case evaluation, preliminary assessments can help to speed up this process, by focussing on potentially threatened species.
+
+# Learning objectives
+After this exercise you will be abler to 
+* Approximate species range sizes based on occurrence records
+* Conduct an automated preliminary conservation assessment for multiple species based on occurrence records and Criterion B of the International Union for the conservation of Nature.
+
+# Data needed
+- cleaned species occurrences, for example as obtained on day 2
+- IUCN red list assessments, for instance as obtained on day 1
+
+# Exercises
+1. Batch calculate EOO and AOO for your the species in your group of interest
+2. Do a preliminary conservation assessment of your group following IUCN Criterion B using the ConR package. You can find a detailed tutorial [here](https://cran.r-project.org/web/packages/ConR/vignettes/my-vignette.html). (`IUCN.eval`)
+2. Compare automated preliminary assessments with the IUCN Red list assessments.
+
+# Possible questions for your project
+* What is the conservation status of your species following Criterion B?
+* What does the regional assessment mean?
+* What caveats could there be with the range based conservation assessment?
+
+# Library setup
+```{r}
+library(rCAT)
+library(ConR)
+library(readr)
+library(dplyr)
+library(rredlist)
+library(jsonlite)
+```
+
+# Tutorial
+
+## 1. Estimation of Extend of Occurrence and Area of Occupancy for many species
+The Extent of Occurrence (EOO) and Area of Occupancy (AOO) are basis for conservation assessments following Criterion B. One way to to batch calculate these indices for many species is the rCat package in R. You can caluclate EOO and AOO from occurrence records.
+
+```{r}
+# load occurrence data
+records <- read_csv("example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv")
+
+
+eoo_aoo<- rCAT::ConBatch(taxa = records$species,
+                           lat = records$decimalLatitude,
+                           lon = records$decimalLongitude,
+                           cellsize = 2000) 
+```   
+
+
+## 2. ConR Automated conservation assessment 
+EOO and AOO alone are not sufficient for an assessment following IUCN Criterion B. You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. T His is based on the EOO we have encountered above and additionally the Area of Occupancy and the number of subpopulations.
+
+```{r, eval=FALSE}
+# Format input data for ConR
+inp <- records%>%
+  filter(!species %in% c("Adansonia digitata", "Bombax ceiba", "Ceiba pentandra")) %>% 
+  dplyr::select(ddlat = decimalLatitude,
+                ddlon = decimalLongitude, 
+                tax = species)
+
+# Preliminary assessment
+ev <- IUCN.eval(inp)
+ev
+```
+
+## 3. Comparing automated assessment and IUCN staus
+Now we can combine the automated assessment with the existing IUCN assessments, to compare them.
+
+```{r}
+# load IUCN Red List from Day 1
+iucn <- read_csv("example_data/bombacoideae_iucn_redlist_assessments.csv")
+
+out <- ev %>% 
+  left_join(iucn,  by = c("taxa" = "scientific_name"))
+
+# compare the important indices
+test <- out %>% 
+  select(taxa, 
+         automated_eoo = EOO, 
+         automated_AOO = AOO, 
+         automated_Category_CriteriaB = Category_CriteriaB,
+         iucn_eoo = eoo_km2,
+         iucn_aoo = aoo_km2,
+         iucn_year = published_year,
+         iucn_category = category, 
+         iucn_criteria = criteria)
+
+# plot for easy evaluation
+plo <- test %>% 
+  filter(!is.na(iucn_category)) %>% 
+  mutate(iucn_eoo = parse_numeric(iucn_eoo))
+
+ggplot(data = plo)+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point(aes(x = automated_eoo, y = iucn_eoo))+
+  theme_bw()
+
+ggplot(data = plo)+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point(aes(x = automated_AOO, y = iucn_aoo))+
+  theme_bw()
+
+```
+
+## 4. Write to disk
+
+```{r}
+write_csv(test, "preliminary_assessment_criterionB.csv")
+```
+
+# Output generated
+1. A .txt with the per species assessments
+2. A series of plots for each species
+3. A series of plots comparing the prediction with the full IUCN assessments
+

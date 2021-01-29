@@ -2,4 +2,72 @@
 output: html_document
 ---
 
-TBA
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+# Objective
+After this short exercise you will be able to download conservation assessments for multiple species from the INternational Union for the Conservation of Nature (www.iucn.org)
+
+# Input data needed
+- a taxon name for which to obtain fossils
+- a list of species or genera names
+
+# Exercises
+1. Download existing conservation assessments from www.iucn.org for your group of interest using the IUCN API.
+
+2. Familiarize yourself with the data 
+
+# Tutorial
+
+To obtain the the IUCN status of species using the r package [rredlist](https://cran.r-project.org/web/packages/rredlist/index.html), you need a token for the IUCN Redlist API.
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(jsonlite)
+library(rredlist)
+
+iucn.key <- "YOUR TOKEN"
+
+splist <- read_csv("example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv") %>% 
+  pull(species)
+
+splist <- read_csv("example_data/day1_biodiversity_databases/species_list_sa_malvaceae.csv") %>% 
+  rename(species = mal) %>%
+  filter(!is.na(species)) %>% 
+  pull(species)
+   
+
+iucn <- data.frame()
+
+#get conservation status from IUCN via the IUCN API
+for(i in 778:length(splist)){
+  print(i)
+  pick <- jsonlite::fromJSON(rl_search_(splist[i], key = iucn.key))$result
+
+  # write.table(pick, "inst/secondary_woodyness_iucn_criteria.txt", 
+  #             append = T, col.names = F, row.names = F)
+  
+  iucn <-  bind_rows(iucn, pick)
+  Sys.sleep(1)
+}
+
+# check the data
+head(iucn)
+table(iucn$category)
+
+# write to disk
+write_csv(iucn, "bombacoideae_iucn_redlist_assessments.csv")
+```
+
+# Output generated
+A .csv file with the conservation assessment for the species of your group of interest
+
+# Further reading
+https://cran.r-project.org/web/packages/rredlist/rredlist.pdf

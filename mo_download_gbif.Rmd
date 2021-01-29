@@ -1,5 +1,171 @@
 ---
-output: html_document
+title: "Downloading occurrences from GBIF"
+output:  html_document
 ---
 
-TBA
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+# Background
+The public availability of species distribution data has increased substantially in the last 10 years: occurrence information, mostly in the form of geographic coordinate records for species across the tree of life, representing hundreds of years of biological collection effort are now available. The global Biodiversity Information Facility (www.gbif.org) is one of the largest data providers, hosting more than one billion records (Sept 2018) from a large variety of sources.
+
+# Learning objectives
+After this exercise you will be able to retrieve species occurrence information from GBIF from within R. You will be obtain the data from your group of interest for the upcoming exercises in the next days. 
+
+# Input data needed
+- The name of your taxon of interest
+- A species or genus list of species in that taxon
+- a higher taxonomic rank including your group of interest
+
+# Exercises
+We will use the rgbif package to obtain occurrence records from GBIF. You can find the relevant functions for each task in the parentheses. You can get help on each function by typing `?FUNCTIONNAME`. 
+
+1. Download occurrence data for a single species from GBIF using the rgbif package.
+2. Obtain occurrences for multiple species using taxon IDs.
+3. Start a download all records for your group of interest from R.
+4. Start a download records for a higher taxonomic group including your group of interest from R.
+6. Download your data from www.gbif.org
+
+# Tutorial
+In the following tutorial, we will go through the questions one-by-one. The suggested answers are by no means the only correct ones.
+
+##Library setup
+In this exercise we will use the rgbif library for communication with GBIF and the tidyverse library for data management.
+
+```{r setup, include=FALSE}
+library(rgbif)
+library(taxize)
+library(tidyverse)
+library(rgdal)
+library(rgeos)
+```
+
+## 1. Download data for a single species we saw in the filedand save them in a data.frame
+GBIF hosts a large number of records and downloading all records might take some time (also the download limit using `occ_search` is 250,000), so it is worth checking first how many records are available. We do this using the `return` argument of the `occ_search` function, which will only return meta-data on the record. Chose a species from your project taxon, for demonstration will download records for the Malvaceae family. We'll first download data for a single, wide-spread species, _Ceiba pentandra_. Note that here we limit the maximum number of records to 1000.
+
+```{r occ_count}
+#Search occurrence records
+dat <- occ_search(scientificName = "Ceiba pentandra", 
+                   return =  "data", limit = 1000)
+
+nrow(dat) # Check the number of records
+head(dat) # Check the data
+plot(dat$decimalLatitude ~ dat$decimalLongitude) # Look at the georeferenced records
+```
+
+So luckily there are a good number of records available. An as the quick visualization shows, a lot of the have geographic coordinates.
+
+## 2. Obtain occurrences for multiple species using taxon IDs
+For your project, we are interested not only in one species, but a list of species. There are multiple ways to batch download data, you can for instance use the higher taxonomic group. HOwever, the specific group may not be part of the taxonomic backbone of GBIF. In this case you can obtain data using a list of genera or species. In any case, it is a good idea, to use the GBIF taxon IDs rather than the scientific name, since this will also include synonyms. You can get the ID with the `get_gbifid_` function of the taxize package. A simple example is to do this for an individual name, for instance a higher taxonomic rank.
+
+```{r}
+ID <- taxize::get_gbifid_("Ceiba pentandra", method="backbone")
+```
+
+The gbif ID is in the usagekey column. There are multiple matches for our name, so we will need to chose which one is the correct one. One simple option is to only retain names that are accepted and matched exactly.
+
+```{r}
+ID <- ID %>% 
+  bind_rows() %>% # get_gbifid_ returns a list, convert to data.frame
+  filter(matchtype == "EXACT" & status == "ACCEPTED") # filter data
+```
+
+This worked, if possible it is better to go through the names to chose the most appropriate name. We can also obtain IDs for higher taxonomic ranks, for instance family names
+
+```{r}
+ID_fam <- taxize::get_gbifid_("Malvaceae", method="backbone")%>% 
+  bind_rows() %>% # get_gbifid_ returns a list, convert to data.frame
+  filter(matchtype == "EXACT" & status == "ACCEPTED") # filter data
+```
+
+We can also obtain IDs for a list of species
+
+```{r}
+#load species list
+splist <- read_csv("example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv")
+
+gbif_taxon_keys <-
+  splist %>%
+  pull("accepted_name") %>% # use fewer names if you want to just test
+  taxize::get_gbifid_(method="backbone") %>% # match names to the GBIF backbone to get taxonkeys
+  imap(~ .x %>% mutate(original_sciname = .y)) %>% # add original name back into data.frame
+  bind_rows() %>% # combine all data.frames into one
+  filter(matchtype == "EXACT" & status == "ACCEPTED") %>% # get only accepted and matched names
+  filter(kingdom == "Plantae") # avoid homonyms
+```
+
+We have found IDs for 159 taxa. It may be that the remaining taxa are not in GBIF, or that the GBIF taxonomy considers some of our names synonyms. We can re-run the query for the remaining species, to see why some names were not matched. 
+
+```{r}
+mis <- splist %>% filter(!accepted_name %in% gbif_taxon_keys$original_sciname)
+
+gbif_taxon_keys_addition <-
+  mis %>%
+  pull("accepted_name") %>% # use fewer names if you want to just test
+  taxize::get_gbifid_(method="backbone") %>% # match names to the GBIF backbone to get taxonkeys
+  imap(~ .x %>% mutate(original_sciname = .y)) %>% # add original name back into data.frame
+  bind_rows()
+```
+
+So, in this case there are multiple reasons, including that the GBIF taxonomy considers some of the names on our list as synonyms and that some names could not be match exactly. How to solve these issues will depend on a case by case studies. If you can, the best solution is to resolve issues for your group of interest by choosing the correct name for the remaining taxa individually. Since we are interested in large-scale approaches, we will proceed with the names we could resolve with the above two tier approach automatically.
+
+```{r}
+gbif_taxon_keys <-  bind_rows(gbif_taxon_keys, gbif_taxon_keys_addition)
+
+# check the number of records per species
+sapply(gbif_taxon_keys$usagekey, "occ_count")
+```
+
+# 3. Download data for your group of interest from GBIF
+To download larger amounts of data the `occ_download` function is the better choice. This will prompt a download from www.gbif.org, which you then can retrieve via the webpage. TO use this function, you need to provide you username, email & pw at www.gbif.org. You can use the `pred_*` functions to limit the scope of the records downloaded, for example to a certain geographic region. There are loads of options, see `?pred` for more information. 
+
+```{r}
+
+# download data
+user <- "YOUR ACCOUNT AT www.gbif.org"
+pwd <- "YOUR PW"
+email <-  "YOUR EMAIL"
+
+occ_download(
+  pred_in("taxonKey", unique(gbif_taxon_keys$usagekey)),
+  pred("hasCoordinate", TRUE),
+  format = "SIMPLE_CSV",
+  user=user,
+  pwd=pwd,
+  email=email
+)
+
+```
+
+## 4. Download records for a higher taxonomic group including your group of interest.
+One way to focus the download is to focus on a specific region. Chose a focus for the higher taxon for your group of interest. For our example data we will download all occurrence records of Malvaceae from South America.
+
+
+You can now download the records for Brazil. Since we want to work with coordinates, we will only download those records that do have coordinates.
+```{r}
+
+occ_download(
+  pred_in("taxonKey", ID_fam$usagekey),
+  pred("hasCoordinate", TRUE),
+  pred("continent", "South America"),
+  format = "SIMPLE_CSV",
+  user=user,
+  pwd=pwd,
+  email=email
+)
+```
+
+That leaves us with records. If you are satisfied for your group you can go to the next step and save the data to the working directory. The limit for record searching using rgbif is 250,000 records, if your group has more records you may limit the geographic area to the north east of Brazil. To do this you can use the Well-known-text format (WKT) to specify an area. Here we use a very simple rectangle, feel free to experiment
+
+## 5. Save the downloaded data as .csv to the working directory.
+You can download the dataset via your account at www.gbif.org.
+
+# Output generated
+1. A .csv file with occurrence records for your group of interest
+
+2. A .csv file with occurrence records for a higher taxon including your group of interest.
+

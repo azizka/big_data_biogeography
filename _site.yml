@@ -29,12 +29,12 @@ navbar:
       href: tue_overview.html
     - text: 1. Cleaning geographic records from public databases
       href: tue_clean_geographic_data.html
-    - text: 2. Cleaning fossil data
+    - text: 2. Cleaning fossil data (optional)
       href: tue_clean_fossils.html
-    - text: 3. Probabilistic cleaning with bRacatus
-      href: tue_probabilistic_cleaning.html
-    - text: 4. Quantifying sampling bias
+    - text: 3. Quantifying sampling bias
       href: tue_sampling_bias.html
+    - text: 4. Probabilistic cleaning with bRacatus
+      href: tue_probabilistic_cleaning.html
     - text: 5. Species richness and range size
       href: tue_species_richness_range_size.html
     - text: Further reading
