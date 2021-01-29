@@ -36,7 +36,7 @@ navbar:
     - text: 4. Probabilistic cleaning with bRacatus
       href: tue_probabilistic_cleaning.html
     - text: 5. Species richness and range size
-      href: tue_species_richness_range_size.html
+      href: tue_species_ranges_and_richness.html
     - text: Further reading
       href: tue_further_reading
   - text: Day 3

@@ -11,7 +11,7 @@
 
 
 
-<title>tue_clean_fossils.utf8</title>
+<title>Cleaning fossil occurrences</title>
 
 <script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -344,7 +344,7 @@ $(document).ready(function () {
       <a href="tue_probabilistic_cleaning.html">4. Probabilistic cleaning with bRacatus</a>
     </li>
     <li>
-      <a href="tue_species_richness_range_size.html">5. Species richness and range size</a>
+      <a href="tue_species_ranges_and_richness.html">5. Species richness and range size</a>
     </li>
     <li>
       <a href="tue_further_reading">Further reading</a>
@@ -428,11 +428,167 @@ $(document).ready(function () {
 
 
 
+<h1 class="title toc-ignore">Cleaning fossil occurrences</h1>
 
 </div>
 
 
-<p>TBA</p>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>The public availability of fossils for large-scale analyses is rapidly increasing, mainly due to increased databasing efforts and data aggregators such as the paleobiology database (www.paleobiodb.org) or Neotoma (www.neotomadb.org), among others. However, data quality is an issue, in particular, for old collections or collections with uncertain taxonomy and/or bad preservation. Similar problems as known from biological collection databases are relevant for fossils, but in addition fossils might be dated wrongly or with very low precision.</p>
+</div>
+<div id="learning-objectives" class="section level1">
+<h1>Learning objectives</h1>
+<p>This tutorial presents a pipeline to clean fossil data from the paleobiology database (or any other) before using it in biogeographic or evolutionary analyses. We focus on identifying overly imprecisely geo-referenced and/or dated records by combining automated cleaning using <em>CoordinateCleaner</em> with cleaning based on meta-data. The proposed steps are by no means exhaustive, and keep in mind that what is “good data” depends entirely on your downstream analyses!</p>
+</div>
+<div id="input-data-needed" class="section level1">
+<h1>Input data needed</h1>
+<ul>
+<li>A .csv file with fossil occurrences, as downloaded on day 1 from the paleobiology database</li>
+</ul>
+</div>
+<div id="exercise" class="section level1">
+<h1>Exercise</h1>
+<ol style="list-style-type: decimal">
+<li>Follow the tutorial below to identify spatial and temporal errors in your fossil dataset. You can either use the fossils of your study group of interest. If there are only few fossils for this group, you may want re-download fossils using a higher level taxon.</li>
+</ol>
+</div>
+<div id="tutorial" class="section level1">
+<h1>Tutorial</h1>
+<div id="load-required-libraries" class="section level2">
+<h2>Load required libraries</h2>
+<p>As a first step we will load the R libraries required for the tutorial. You might need to install some of them using <code>install.packages</code>.</p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(CoordinateCleaner)
+library(countrycode)
+library(paleobioDB)
+library(readr)</code></pre>
+</div>
+<div id="load-test-dataset" class="section level2">
+<h2>Load test dataset</h2>
+<p>For this tutorial we will use a dataset of vascular plant fossils from the last 65 million years, downloaded from the paleobiology database using the plaeobioDB package. For the tutorial we’ll limit the data to maximum 5,000 records, to keep the downloading time reasonable. If you obtained your data from the web mask of the paleobiology database, or use an entirely different database, you will have to adapt the column names in the script.</p>
+<pre class="r"><code>dat &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/raw_fossil_records.csv&quot;)</code></pre>
+</div>
+<div id="visualize-the-records-on-a-map" class="section level2">
+<h2>Visualize the records on a map</h2>
+<p>As a first step we will visualize the records on a map, to get a general overview.</p>
+<pre class="r"><code># plot data to get an overview
+wm &lt;- borders(&quot;world&quot;, colour = &quot;gray50&quot;, fill = &quot;gray50&quot;)
+ggplot() + coord_fixed() + wm + geom_point(data = dat, aes(x = lng, y = lat), colour = &quot;darkred&quot;, size = 0.5) + theme_bw()</code></pre>
+<div id="spatial-issues" class="section level3">
+<h3>Spatial issues</h3>
+<p>We’ll first check coordinate validity to check if all coordinates are numeric and part of a lat/lon coordinate reference system using <code>cc_val</code>.</p>
+<pre class="r"><code>cl &lt;- cc_val(dat, lat = &quot;lat&quot;, lon = &quot;lng&quot;)</code></pre>
+<p>Looks good, then we will test for coordinates with equal longitude and latitude. You can use the <code>test</code> argument to specify if coordinates should be flagged if their absolute values are identical (e.g. 56,-56).</p>
+<pre class="r"><code>cl &lt;- cc_equ(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;)</code></pre>
+<p>For the purpose of the tutorial, we will always exclude flagged records. If you want to further explore them, and you should if by any means possible, use the <code>value = "flagged"</code> argument, valid for all functions. In that case the output value will be a vector of logical values with the same length as <code>dat</code>, where TRUE = valid record, FALSE = flagged record. It is generally advisable to check flagged records whenever possible, to avoid data-loss and false flags.</p>
+<pre class="r"><code>fl &lt;- cc_equ(dat, value = &quot;flagged&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;)
+
+# extract and check the flagged records
+fl_rec &lt;- dat[!fl, ]
+head(fl_rec)</code></pre>
+<p>We’ll also test if the records are identical, or in close vicinity to the centroids of political units. You can modify the buffer around each centroid using the <code>buffer</code> argument and the level of testing (country centroids, province centroids, or both) using the <code>test argument</code>. In case you have a list of geographic coordinates you consider problematic, for instance a list of cities you can provide them as custom gazetteer using the <code>ref</code> argument.</p>
+<pre class="r"><code>fl &lt;- cc_cen(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;, value = &quot;flagged&quot;)
+fl_rec &lt;- cl[!fl, ]
+unique(fl_rec$cc)
+cl &lt;- cl[fl, ]</code></pre>
+<p>Next we will test if the coordinates are within the country they are assigned to. This test is a bit more tricky, as it will also flag records, if the country name in the country column is not following ISO3 or if the records have been assigned during a different political landscape. For instance records from former Western and Eastern Germany. Here we need to convert the country annotation in column cc from ISO2 to ISO3; it is advisable to double check which records have be flagged, to avoid unnecessary data loss (see above).</p>
+<pre class="r"><code># adapt country code to ISO3, for country test
+cs_ma &lt;- &quot;GBR&quot;
+names(cs_ma) &lt;- &quot;UK&quot;
+cl$cc_iso3 &lt;- countrycode(cl$cc, origin = &quot;iso2c&quot;, destination = &quot;iso3c&quot;, custom_match = cs_ma)
+
+cl &lt;- cc_coun(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;, iso3 = &quot;cc_iso3&quot;)</code></pre>
+<p>Next we will test if any of the records bear the coordinates of a hosting biodiversity institution or the GBIF headquarters, using the <code>institutions</code> database of <em>CoordinateCleaner</em>. As for the country centroid test you can change the buffer around the institutions with the <code>buffer</code> argument.</p>
+<pre class="r"><code>cl &lt;- cc_inst(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;)
+cl &lt;- cc_gbif(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;)</code></pre>
+<p>Finally, we will test for plain zero coordinates (e.g. 0/0).</p>
+<pre class="r"><code>cl &lt;- cc_zero(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;)</code></pre>
+</div>
+<div id="temporal-issues" class="section level3">
+<h3>Temporal issues</h3>
+<p>The spatial cleaning above is mostly identical with steps from recent geographic records. Additionally  includes three functions to test the temporal dimension of fossils. Fossil ages are usually defined with a maximum and a minimum range, based on geological strata. First we will exclude records without dating information (NA) and then test for records with equal minimum and maximum range. Unless your data includes absolutely dated fossils, this will most likely be an data entry error.</p>
+<pre class="r"><code>cl &lt;- cl[!is.na(cl$late_age), ]
+cl &lt;- cl[!is.na(cl$early_age), ]
+cl &lt;- cf_equal(cl, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)</code></pre>
+<p>Next we will look at the age range (= max age - min age) of each record. The age range is the dating precision and can vary considerably, depending on the data available for dating. For many analyses, for instance in PyRate, very imprecisely dated records are not suitable. Lets first have a look at the age ranges in our test dataset.</p>
+<pre class="r"><code>rang &lt;- cl$early_age - cl$late_age
+hist(rang, breaks = 40, xlab = &quot;Date range [max age - min age]&quot;, main = &quot;&quot;)</code></pre>
+<p>Some individual records are dated with a precision of more than 60 million years!  offers two ways to flag records based on their age range (1) based on absolute age, e.g. age range &gt; 35 million years or (2) based on age range outlier detection in the entire dataset (e.g. if few records are much less precisely dated than the rest of all records) and (3) based on age range outlier detection on taxon level (e.g. all  records that are much less precisely dated than the other  records. The second and third approach can be combined and offer some more flexibility over the absolute age limit, but need some consideration on the desired sensitivity. Here, we will run all three variants for illustration, if you use your own data you should decide which one is more suitable depending on your downstream analyses. In the case of (2) and (3) you can tweak the test sensitivity using the <code>mltpl</code> argument.</p>
+<pre class="r"><code># Outlier dataset
+cl &lt;- cf_range(cl, taxon = &quot;&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)
+
+# Outlier per taxon
+cl &lt;- cf_range(cl, taxon = &quot;taxon_name&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)
+
+# Absolute age limit
+cl &lt;- cf_range(cl, taxon = &quot;taxon_name&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;, method = &quot;time&quot;, max_range = 35)
+
+rang &lt;- cl$early_age - cl$late_age
+hist(rang, breaks = 40, xlab = &quot;Date range [max age - min age]&quot;, main = &quot;&quot;)
+</code></pre>
+<p>Finally we will test for outliers in space-time, that is records that are either very distant in space or in time from all other records (1) in the dataset (2) per taxon. The test is again based on quantile outlier detection and can be modified using various arguments. Here it is important to carefully consider the desired test sensitivity. See <code>?cf_outl</code> for help.</p>
+<pre class="r"><code># Outlier dataset
+cl &lt;- cf_outl(cl, taxon = &quot;&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)
+
+# Outlier taxon
+cl &lt;- cf_outl(cl, taxon = &quot;taxon_name&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)</code></pre>
+<p>Done! To check how many records have been flagged in total, you can compare the two datasets.</p>
+<pre class="r"><code>nrow(dat) - nrow(cl)</code></pre>
+<p>So far so good, we have significantly refined the data for our needs. In section 6 we will have a look at the meta-data for further refinement, but before, note that there are two different ways to run <em>CoordinateCleaner</em>. You can connect all functions directly in a row using the magrittr pipe (%&gt;%) operator.</p>
+</div>
+</div>
+<div id="improving-data-quality-using-meta-data" class="section level2">
+<h2>Improving data quality using meta-data</h2>
+<p>Usually, at least some type of meta-data are provided with fossil occurrences, as is the case in the paleobiology database. We’ll now explore these and see if we can identify further problems.</p>
+<div id="basic-taxonomy" class="section level3">
+<h3>Basic taxonomy</h3>
+<p>First we’ll take a short look at taxonomy. Fossil taxonomy is very complex and composite databases often have taxonomic issues that are extremely difficult to resolve. Here we will only do some very basic checks to test if: 1. all taxa in our dataset are plants, 2. they are at least identified to genus level.</p>
+<pre class="r"><code># 1. This looks OK
+table(cl$phylum)
+
+# 2. Taxonomic level of identification
+table(cl$taxon_rank)</code></pre>
+<p>The required taxonomic level of course depends on the downstream analyses, but here we will exclude everything other than genus or species, which is a reasonable approach for most PyRate analyses.</p>
+<pre class="r"><code>cl &lt;- cl %&gt;% filter(taxon_rank %in% c(&quot;species&quot;, &quot;genus&quot;))</code></pre>
+</div>
+<div id="spatial-coordinates" class="section level3">
+<h3>Spatial coordinates</h3>
+<p>The Paleobiology database includes some information on the basis of the geographic data for many records.</p>
+<pre class="r"><code>table(cl$geogscale)</code></pre>
+<p>As expected most records are only roughly geo-referenced, but the precision is still relatively high for many records.</p>
+</div>
+<div id="time" class="section level3">
+<h3>Time</h3>
+<p>We have checked for potentially problematic records in time and space above, but it is definitively advisable to check again.</p>
+<pre class="r"><code># minimum ages
+tail(table(cl$late_age))
+
+ggplot(cl) + geom_histogram(aes(x = late_age))
+
+# maximum ages
+tail(table(cl$early_age))
+
+ggplot(cl) + geom_histogram(aes(x = early_age))</code></pre>
+<p>The minimum and maximum ages look unproblematic, but there are still some records with very large temporal uncertainties, and at least one case where the minimum and maximum age seem reversed. This might be informative in some cases, but for most analysis this might be problematic, so here we exclude all records with temporal uncertainty which will retain 95% of the data. This is an arbitrary choice, and you’ll have to choose a more suitable value based on your planned analyses.</p>
+</div>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>Through the various cleaning steps outline above, we have identified some potential major caveats and hopefully increased the quality of the dataset. We have excluded a significant fraction of all records. Data quality is a delicate issue, especially for fossils from compound data bases and the usefulness of individual records will depend on your downstream analyses. We hope that you find this tutorial useful in exploring data downloaded from the Paleobiology database and to explore the quality of any fossil dataset.</p>
+</div>
+<div id="write-to-disk" class="section level2">
+<h2>Write to disk</h2>
+<pre class="r"><code>write_csv(cl, &quot;cleaned_fossils.csv&quot;)</code></pre>
+</div>
+</div>
+<div id="output" class="section level1">
+<h1>Output</h1>
+<ul>
+<li>a .csv file with cleaned fossil occurrences</li>
+</ul>
+</div>
 
 
 

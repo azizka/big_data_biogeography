@@ -1,8 +1,6 @@
 ---
-title: "AUtomated conservation assessment following Criterion B"
-output: 
-  html_document:
-    theme: readable
+title: "Automated conservation assessment following Criterion B"
+output:  html_document
 ---
 
 ```{r global_options, include=FALSE}

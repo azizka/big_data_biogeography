@@ -1,4 +1,5 @@
 ---
+title: "Further reading"
 output: html_document
 ---
 
@@ -9,7 +10,7 @@ output: html_document
 2. Tara A. Pelletier, Bryan C. Carstens, David C. Tank, Jack Sullivan, Anahí Espíndola (2019) Predicting plant conservation priorities on a global scale
 Proceedings of the National Academy of Sciences, 115 (51) 13027-13032; DOI: 10.1073/pnas.1804098115
 
-3.Zizka, A., Silvestro, D., Vitt, P. and Knight, T.M. (2021), Automated conservation assessment of the orchid family with deep learning. Conservation Biology. https://doi.org/10.1111/cobi.13616
+3. Zizka, A., Silvestro, D., Vitt, P. and Knight, T.M. (2021), Automated conservation assessment of the orchid family with deep learning. Conservation Biology. https://doi.org/10.1111/cobi.13616
 
 4.  Panter, CT, Clegg, RL, Moat, J, Bachman, SP, Klitgård, BB, White, RL. To clean or not to clean: Cleaning open‐source data improves extinction risk assessments for threatened plant species. Conservation Science and Practice. 2020; 2:e311. https://doi.org/10.1111/csp2.311
 
