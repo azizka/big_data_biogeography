@@ -6,13 +6,13 @@ output: html_document
 # Learning objectives
 After this day you will be able to:
 
-1. Generate axon-specific bioregions using innovative methods based on network connectivity and dissimilarity
+1. Generate taxon-specific bioregions using innovative methods based on network connectivity and dissimilarity
 
 2. Assign species to geographic regions using geo-referenced point occurrences
 
 3. Reconstruct species ancestral ranges using the DEC model in R 
 
-4. Present estimates of area-specific diversification rates, based on State Specific Speciation and Extinction models (SSE)
+4. Infer of area-specific diversification rates, based on State Specific Speciation and Extinction models (SSE)
 
 # Detailed schedule
 
