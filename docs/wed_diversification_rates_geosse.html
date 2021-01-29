@@ -338,10 +338,10 @@ $(document).ready(function () {
       <a href="tue_clean_fossils.html">2. Cleaning fossil data (optional)</a>
     </li>
     <li>
-      <a href="tue_probabilistic_cleaning.html">3. Probabilistic cleaning with bRacatus</a>
+      <a href="tue_sampling_bias.html">3. Quantifying sampling bias</a>
     </li>
     <li>
-      <a href="tue_sampling_bias.html">4. Quantifying sampling bias</a>
+      <a href="tue_probabilistic_cleaning.html">4. Probabilistic cleaning with bRacatus</a>
     </li>
     <li>
       <a href="tue_species_richness_range_size.html">5. Species richness and range size</a>
@@ -499,8 +499,7 @@ hist(delta_extinction)</code></pre>
 <h1>Run on multiple trees</h1>
 <p>If provided with a tree file that includes multiple trees the MCMC can run sequentially on different trees to account for phylogenetic uncertainty. The <code>burnin</code> defines how many initial MCMC iterations should be discarded (i.e. not saved in the log file) for each tree.</p>
 <pre class="r"><code>tree_file = &quot;bromelioieae_100.trees&quot;
-run_mcmc_SSE(tree_file, trait_file, model = &quot;geosse&quot;, outfile = &quot;bromeliad_geosse100.log&quot;, iterations = 10000, nTREES = 5, 
-    burnin = 100)</code></pre>
+run_mcmc_SSE(tree_file, trait_file, model = &quot;geosse&quot;, outfile = &quot;bromeliad_geosse100.log&quot;, iterations = 10000, nTREES = 5, burnin = 100)</code></pre>
 </div>
 
 

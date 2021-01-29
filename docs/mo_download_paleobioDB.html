@@ -338,10 +338,10 @@ $(document).ready(function () {
       <a href="tue_clean_fossils.html">2. Cleaning fossil data (optional)</a>
     </li>
     <li>
-      <a href="tue_probabilistic_cleaning.html">3. Probabilistic cleaning with bRacatus</a>
+      <a href="tue_sampling_bias.html">3. Quantifying sampling bias</a>
     </li>
     <li>
-      <a href="tue_sampling_bias.html">4. Quantifying sampling bias</a>
+      <a href="tue_probabilistic_cleaning.html">4. Probabilistic cleaning with bRacatus</a>
     </li>
     <li>
       <a href="tue_species_richness_range_size.html">5. Species richness and range size</a>
@@ -432,7 +432,74 @@ $(document).ready(function () {
 </div>
 
 
-<p>TBA</p>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>Fossils provide essential information for historical biogeography and evolutionary biology, as they provide independent data on the evolution of species ranges through time. However, because the fossil record is very limited and biased, and collecting and identifying fossils is challenging only few fossils are available in many taxonomic groups. The Paleobiology database is a publicly available repository gather information on fossil occurrences from the literature.</p>
+</div>
+<div id="objective" class="section level1">
+<h1>Objective</h1>
+<p>After this short exercise you will be able to download fossil occurrence from the <a href="https://paleobiodb.org/#/">Paleobiology database</a> using the <a href="https://github.com/ropensci/paleobioDB">paleobioDB package</a>. THe fourth day of the course will be dedicated to how to use fossils for biogeography.</p>
+</div>
+<div id="input-data-needed" class="section level1">
+<h1>Input data needed</h1>
+<ul>
+<li>a taxon name for which to obtain fossils</li>
+<li>a list of species or genera names</li>
+</ul>
+</div>
+<div id="tasks" class="section level1">
+<h1>Tasks</h1>
+<ol style="list-style-type: decimal">
+<li>Download all fossil records available for your taxon of interest from the PaleobiologyDB. In the case, that there are no fossils available for your taxon, move up as many taxonomic ranks as necessary. (<code>pdb_occurrence</code>)</li>
+</ol>
+</div>
+<div id="tutorial" class="section level1">
+<h1>Tutorial</h1>
+<p>Note that we set the limit to 500 here, you might want to change this, if you have a group with many fossils</p>
+<pre class="r"><code>library(paleobioDB)
+library(readr)
+library(dplyr)
+
+# Check out the pbdb_occurrences function to download the data
+`?`(pbdb_occurrences)
+
+# get the data from the Paleobiology DB, use the arguments to narrow your search
+dat_tax &lt;- paleobioDB::pbdb_occurrences(base_name = c(&quot;Malvaceae&quot;, &quot;Bombacaceae&quot;), vocab = &quot;pbdb&quot;, limit = 500, show = c(&quot;coords&quot;, &quot;phylo&quot;, &quot;attr&quot;, &quot;loc&quot;, &quot;time&quot;, 
+    &quot;rem&quot;, &quot;ident&quot;))
+rownames(dat) &lt;- NULL
+
+# It is also possible to download records from a list of species or genera which may yield more results
+gen_list &lt;- read_csv(&quot;example_data/day1_biodiversity_databases/bombacoideae_genuslist.csv&quot;)
+
+dat_gen &lt;- paleobioDB::pbdb_occurrences(base_name = gen_list$gen, vocab = &quot;pbdb&quot;, limit = 500, show = c(&quot;coords&quot;, &quot;phylo&quot;, &quot;attr&quot;, &quot;loc&quot;, &quot;time&quot;, &quot;rem&quot;, &quot;ident&quot;))
+
+# combine the two datasets
+dat &lt;- bind_rows(dat_tax, dat_gen)
+
+# But be careful with homonyms!
+unique(dat$phylum)
+
+dat &lt;- dat[dat$phylum == &quot;Spermatophyta&quot;, ]
+
+# Visualize
+pbdb_map(dat)
+pbdb_richness(dat, rank = &quot;species&quot;, temporal_extent = c(100, 0))
+pbdb_temporal_resolution(dat)
+
+# write to disk
+write_csv(dat, &quot;raw_fossil_records.csv&quot;)</code></pre>
+<p>Beware of synonyms and errors, they could twist your estimations about species richness, evolutionary and extinction rates, etc. paleobioDB users should be critical about the raw data downloaded from the database and filter the data before analysing it.</p>
+</div>
+<div id="output-generated" class="section level1">
+<h1>Output generated</h1>
+<ul>
+<li>A .csv file with fossil occurrences.</li>
+</ul>
+</div>
+<div id="further-reading" class="section level1">
+<h1>Further reading</h1>
+<p>You can find more information on paleoDB at <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01154" class="uri">https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01154</a> and <a href="https://cran.r-project.org/web/packages/paleobioDB/paleobioDB.pdf" class="uri">https://cran.r-project.org/web/packages/paleobioDB/paleobioDB.pdf</a>.</p>
+</div>
 
 
 

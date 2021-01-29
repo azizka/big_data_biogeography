@@ -338,10 +338,10 @@ $(document).ready(function () {
       <a href="tue_clean_fossils.html">2. Cleaning fossil data (optional)</a>
     </li>
     <li>
-      <a href="tue_probabilistic_cleaning.html">3. Probabilistic cleaning with bRacatus</a>
+      <a href="tue_sampling_bias.html">3. Quantifying sampling bias</a>
     </li>
     <li>
-      <a href="tue_sampling_bias.html">4. Quantifying sampling bias</a>
+      <a href="tue_probabilistic_cleaning.html">4. Probabilistic cleaning with bRacatus</a>
     </li>
     <li>
       <a href="tue_species_richness_range_size.html">5. Species richness and range size</a>
@@ -432,7 +432,66 @@ $(document).ready(function () {
 </div>
 
 
-<p>TBA</p>
+<div id="objective" class="section level1">
+<h1>Objective</h1>
+<p>After this short exercise you will be able to download conservation assessments for multiple species from the INternational Union for the Conservation of Nature (www.iucn.org)</p>
+</div>
+<div id="input-data-needed" class="section level1">
+<h1>Input data needed</h1>
+<ul>
+<li>a taxon name for which to obtain fossils</li>
+<li>a list of species or genera names</li>
+</ul>
+</div>
+<div id="tasks" class="section level1">
+<h1>Tasks</h1>
+<ol style="list-style-type: decimal">
+<li><p>Download existing conservation assessments from www.iucn.org for your group of interest using the IUCN API.</p></li>
+<li><p>Download the same data for a larger taxonomic group including your focus group (e.g. family or order).</p></li>
+<li><p>Familiarize yourself with the data</p></li>
+</ol>
+</div>
+<div id="tutorial" class="section level1">
+<h1>Tutorial</h1>
+<p>To obtain the the IUCN status of species using the r package <a href="https://cran.r-project.org/web/packages/rredlist/index.html">rredlist</a>, you need a token for the IUCN Redlist API.</p>
+<pre class="r"><code>library(tidyverse)
+library(readxl)
+library(jsonlite)
+library(rredlist)
+
+iucn.key &lt;- &quot;YOUR TOKEN&quot;
+
+splist &lt;- read_csv(&quot;example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv&quot;) %&gt;% pull(species)
+
+
+iucn &lt;- data.frame()
+
+# get conservation status from IUCN via the IUCN API
+for (i in 1:length(splist)) {
+    print(i)
+    pick &lt;- jsonlite::fromJSON(rl_search_(splist[i], key = iucn.key))$result
+    
+    # write.table(pick, &#39;inst/secondary_woodyness_iucn_criteria.txt&#39;, append = T, col.names = F, row.names = F)
+    
+    iucn &lt;- bind_rows(iucn, pick)
+    Sys.sleep(1)
+}
+
+# check the data
+head(iucn)
+table(iucn$category)
+
+# write to disk
+write_csv(iucn, &quot;output/bombacoideae_iucn_redlist_assessments.csv&quot;)</code></pre>
+</div>
+<div id="output-generated" class="section level1">
+<h1>Output generated</h1>
+<p>A .csv file with the conservation assessment for the species of your group of interest</p>
+</div>
+<div id="further-reading" class="section level1">
+<h1>Further reading</h1>
+<p><a href="https://cran.r-project.org/web/packages/rredlist/rredlist.pdf" class="uri">https://cran.r-project.org/web/packages/rredlist/rredlist.pdf</a></p>
+</div>
 
 
 

@@ -338,10 +338,10 @@ $(document).ready(function () {
       <a href="tue_clean_fossils.html">2. Cleaning fossil data (optional)</a>
     </li>
     <li>
-      <a href="tue_probabilistic_cleaning.html">3. Probabilistic cleaning with bRacatus</a>
+      <a href="tue_sampling_bias.html">3. Quantifying sampling bias</a>
     </li>
     <li>
-      <a href="tue_sampling_bias.html">4. Quantifying sampling bias</a>
+      <a href="tue_probabilistic_cleaning.html">4. Probabilistic cleaning with bRacatus</a>
     </li>
     <li>
       <a href="tue_species_richness_range_size.html">5. Species richness and range size</a>
@@ -473,9 +473,8 @@ tipranges = getranges_from_LagrangePHYLIP(lgdata_fn = geogfn)</code></pre>
 <h2>Set up the DEC model</h2>
 <pre class="r"><code>BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 
-# set the macimum number of areas. If you ahve many areas, you can set the amximum number of areas a species can
-# occur in simultaneously. One possibility is to set this to the number of areas of the most widespread recent
-# species.
+# set the macimum number of areas. If you ahve many areas, you can set the amximum number of areas a species can occur in simultaneously. One possibility is to
+# set this to the number of areas of the most widespread recent species.
 max_range_size = 5
 numstates_from_numareas(numareas = 5, maxareas = 5, include_null_range = TRUE)
 
@@ -535,8 +534,7 @@ row.names(range_probabilities) = trtable$node
 names(range_probabilities) = ranges_list
 
 # Write the table to a tab-delimited text file (for Excel etc.)
-write.table(range_probabilities, file = &quot;example_data/bombacoideae_DEC_node_probabilities.txt&quot;, row.names = F, quote = FALSE, 
-    sep = &quot;\t&quot;)</code></pre>
+write.table(range_probabilities, file = &quot;example_data/bombacoideae_DEC_node_probabilities.txt&quot;, row.names = F, quote = FALSE, sep = &quot;\t&quot;)</code></pre>
 </div>
 <div id="visualization" class="section level2">
 <h2>Visualization</h2>
@@ -548,14 +546,12 @@ results_object = resDEC
 scriptdir = np(system.file(&quot;extdata/a_scripts&quot;, package = &quot;BioGeoBEARS&quot;))
 
 # A plot of ancestral states
-res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params = list(&quot;j&quot;), plotwhat = &quot;text&quot;, label.offset = 2, 
-    tipcex = 0.7, statecex = 0.6, splitcex = 0.6, titlecex = 0.8, plotsplits = F, cornercoords_loc = scriptdir, 
-    include_null_range = TRUE, tr = tr, tipranges = tipranges, plotlegend = T)
+res2 = plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params = list(&quot;j&quot;), plotwhat = &quot;text&quot;, label.offset = 2, tipcex = 0.7, statecex = 0.6, 
+    splitcex = 0.6, titlecex = 0.8, plotsplits = F, cornercoords_loc = scriptdir, include_null_range = TRUE, tr = tr, tipranges = tipranges, plotlegend = T)
 
 # showing pie charts for each node with the probabilities
-plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params = list(&quot;j&quot;), plotwhat = &quot;pie&quot;, label.offset = 2, 
-    tipcex = 0.7, statecex = 0.7, splitcex = 0.6, titlecex = 0.8, plotsplits = F, cornercoords_loc = scriptdir, 
-    include_null_range = TRUE, tr = tr, tipranges = tipranges)</code></pre>
+plot_BioGeoBEARS_results(results_object, analysis_titletxt, addl_params = list(&quot;j&quot;), plotwhat = &quot;pie&quot;, label.offset = 2, tipcex = 0.7, statecex = 0.7, splitcex = 0.6, 
+    titlecex = 0.8, plotsplits = F, cornercoords_loc = scriptdir, include_null_range = TRUE, tr = tr, tipranges = tipranges)</code></pre>
 <p>Done!</p>
 </div>
 </div>

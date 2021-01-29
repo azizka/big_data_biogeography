@@ -11,7 +11,7 @@
 
 
 
-<title>tue_sampling_bias.utf8</title>
+<title>Sampling bias</title>
 
 <script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -338,10 +338,10 @@ $(document).ready(function () {
       <a href="tue_clean_fossils.html">2. Cleaning fossil data (optional)</a>
     </li>
     <li>
-      <a href="tue_probabilistic_cleaning.html">3. Probabilistic cleaning with bRacatus</a>
+      <a href="tue_sampling_bias.html">3. Quantifying sampling bias</a>
     </li>
     <li>
-      <a href="tue_sampling_bias.html">4. Quantifying sampling bias</a>
+      <a href="tue_probabilistic_cleaning.html">4. Probabilistic cleaning with bRacatus</a>
     </li>
     <li>
       <a href="tue_species_richness_range_size.html">5. Species richness and range size</a>
@@ -428,11 +428,80 @@ $(document).ready(function () {
 
 
 
+<h1 class="title toc-ignore">Sampling bias</h1>
 
 </div>
 
 
-<p>TBA</p>
+<div id="background" class="section level2">
+<h2>Background</h2>
+<p>Sampling effort is a critical measure for the reliability of present/absence projections from species occurrence data. However, dataset from publicly available databases based on biological collections are often comprised from various sources and compiled over large time periods and information on sampling effort is therefore most of the time unavailable. Physical accessibility of a region has been identified as major predictor of sampling effort, but this effect might vary among datasets. The SampBias package allows quantifying the effect of different anthropogenic structures (roads, airports, cities) on sampling in any given dataset based on geographic gazetteers. You can find a description of the methods here and tutorials on the use of SampBias <a href="https://github.com/azizka/sampbias/wiki">here</a>. <strong>NOTE SampBias is only available as beta version</strong></p>
+</div>
+<div id="objectives" class="section level2">
+<h2>Objectives</h2>
+<p>After this exercise you will be able to * quantify the effect of accessibility on the sampling pattern in species occurrence dataset * have an idea on political factors biasing data collection</p>
+</div>
+<div id="exercise" class="section level2">
+<h2>Exercise</h2>
+<p>Helpful functions for answering each question are given in the brackets. In case you want to get a feeling for the functionality of SampBias, without using are, you can find a GUI app here.</p>
+<ol style="list-style-type: decimal">
+<li>Load the distribution data. (<code>read.csv</code>)</li>
+<li>Run sampbias with the default settings. (<code>SamplingBias</code>)</li>
+<li>Look at the run summary and visualize the results. How informative are the results? (<code>par, plot</code>)</li>
+<li>Explore <code>?SamplingBias</code> and try to change the relevant arguments to improve the results. Summarize and visualize again.</li>
+<li>Explore the relation of socio-economic factors in your group of interest using the Bio-Dem web-app <a href="https://bio-dem.surge.sh/" class="uri">https://bio-dem.surge.sh/</a></li>
+</ol>
+</div>
+<div id="possible-questions-for-your-research-project" class="section level2">
+<h2>Possible questions for your research project</h2>
+<ul>
+<li>How biased is your collection dataset by accesability?</li>
+<li>Which inffrastructure is most biasing?</li>
+</ul>
+</div>
+<div id="library-setup" class="section level2">
+<h2>Library setup</h2>
+<p>You will need the following R libraries for this exercise, just copy the code chunk into you R console to load them. You might need to install some of them separately.</p>
+<pre class="r"><code>library(tidyverse)
+library(sampbias)</code></pre>
+</div>
+<div id="tutorial" class="section level1">
+<h1>Tutorial</h1>
+<div id="load-the-example-distribution-data-from-your-data" class="section level2">
+<h2>1. Load the example distribution data from your data</h2>
+<pre class="r"><code>occ &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_malvaceae.csv&quot;) %&gt;% mutate(decimallongitude = decimalLongitude) %&gt;% mutate(decimallatitude = decimalLatitude)</code></pre>
+</div>
+<div id="run-sampbias-with-the-default-settings.-samplingbias" class="section level2">
+<h2>2. Run sampbias with the default settings. (SamplingBias)</h2>
+<p>A <em>sampbias</em> analysis is run in one line of code via the <code>calculate_bias</code> function. This may need some time. Make sure to chose a resolution suitable for the geographic extent of your data. You will see a warning if the resolution is too high causing unfeasible computation time.</p>
+<pre class="r"><code># run sampbias
+bias.out &lt;- calculate_bias(x = occ, res = 1)
+
+# Summarize and visualize the results
+summary(bias.out)
+plot(bias.out)</code></pre>
+<p>In addition to the input from above, <code>calculate_bias</code> offers options to customize analyses, of which the most important ones are shown in Table 1. See <code>?calculate_bias</code> for a detailed description of all options, and the section “Changing default settings” of this tutorial for a description and examples for the “restricted sample” and “inp_raster” options. <strong>It is of special importance to adapt the raster resolution to the extent of the study area via the <code>res</code> or <code>inp_raster</code> options.</strong></p>
+<p>As the last step, it is possible to project the bias effects into space and map them to identify areas with particular high bias, for instance, to design future field campaigns (Fig. 2).</p>
+<pre class="r"><code>proj &lt;- project_bias(bias.out)
+map_bias(proj)</code></pre>
+</div>
+<div id="look-at-the-run-summary-and-visualize-the-results.-how-informative-are-the-results" class="section level2">
+<h2>3. Look at the run summary and visualize the results. How informative are the results?</h2>
+<pre class="r"><code># summarize results
+summary(bias.out)
+
+# Visualize
+plot(bias.out)</code></pre>
+</div>
+<div id="explore-samplingbias-and-try-to-change-the-relevant-arguments-and-the-study-extent-to-improve-the-results.-summarize-and-visualize-again." class="section level2">
+<h2>4. Explore <code>?SamplingBias</code> and try to change the relevant arguments and the study extent to improve the results. Summarize and visualize again.</h2>
+<pre class="r"><code>`?`(calculate_bias)</code></pre>
+</div>
+<div id="explore-the-bio-dem-app-to-explore-the-effect-of-political-factors-on-data-collections-in-your-group." class="section level2">
+<h2>5. Explore the Bio-Dem app to explore the effect of political factors on data collections in your group.</h2>
+<p>Have a look at <a href="http://bio-dem.surge.sh/" class="uri">http://bio-dem.surge.sh/</a> and use the app to explore the relation of socio-economic factors with the availability of occurrence records</p>
+</div>
+</div>
 
 
 

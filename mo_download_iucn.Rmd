@@ -10,6 +10,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
                       results = 'hold')
 ```
 
+
 # Objective
 After this short exercise you will be able to download conservation assessments for multiple species from the INternational Union for the Conservation of Nature (www.iucn.org)
 
@@ -17,10 +18,12 @@ After this short exercise you will be able to download conservation assessments 
 - a taxon name for which to obtain fossils
 - a list of species or genera names
 
-# Exercises
+# Tasks
 1. Download existing conservation assessments from www.iucn.org for your group of interest using the IUCN API.
 
-2. Familiarize yourself with the data 
+2. Download the same data for a larger taxonomic group including your focus group (e.g. family or order).
+
+3. Familiarize yourself with the data 
 
 # Tutorial
 
@@ -37,17 +40,12 @@ iucn.key <- "YOUR TOKEN"
 
 splist <- read_csv("example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv") %>% 
   pull(species)
-
-splist <- read_csv("example_data/day1_biodiversity_databases/species_list_sa_malvaceae.csv") %>% 
-  rename(species = mal) %>%
-  filter(!is.na(species)) %>% 
-  pull(species)
-   
+  
 
 iucn <- data.frame()
 
 #get conservation status from IUCN via the IUCN API
-for(i in 778:length(splist)){
+for(i in 1:length(splist)){
   print(i)
   pick <- jsonlite::fromJSON(rl_search_(splist[i], key = iucn.key))$result
 
@@ -63,7 +61,7 @@ head(iucn)
 table(iucn$category)
 
 # write to disk
-write_csv(iucn, "bombacoideae_iucn_redlist_assessments.csv")
+write_csv(iucn, "output/bombacoideae_iucn_redlist_assessments.csv")
 ```
 
 # Output generated
