@@ -8,9 +8,9 @@ After this day you will be able to:
 
 1. Batch generate preliminary conservation assessments for many species following IUCN Criterion B using automated software tools
 
-2. Understand the value of neural networks for overcoming shortfalls 
+2. Understand how classification through neural networks works and how it can help predicting conservation status 
 
-3. Estimate species IUCN conservation status for a group of Not evaluated species using neural networks and geo-referenced species occurrences in R
+3. Estimate species IUCN conservation status for a group of not-evaluated species using neural networks and geo-referenced species occurrences in R
 
 # Detailed schedule
 
@@ -19,11 +19,11 @@ After this day you will be able to:
 - Lecture "IUCN conservation assessments/automated assessments"
 
 14:00 - 15:00
-- Lecture "Classification and neural networks"
+- Lecture "Classification using neural networks"
 
 15:00-17:00
 - Demonstration "Automated assessments following IUCN Criterion B"
-- Demonstration "Automated assessments using Neural networks
+- Demonstration "Automated assessments using neural networks
 
 
 ### Exercises (asynchronous)
