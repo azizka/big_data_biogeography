@@ -1,5 +1,5 @@
 ---
-title: "SPeceis ranges and richness"
+title: "Species ranges and richness"
 output: html_document
 ---
 

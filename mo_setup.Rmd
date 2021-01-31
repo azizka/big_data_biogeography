@@ -22,7 +22,7 @@ install.packages(c(
   "rgdal",
   "rgbif",
   "ConR",
-  "rCat",
+  "rCAT",
   "rredlist",
   "jsonlite",
   "rgeos",
