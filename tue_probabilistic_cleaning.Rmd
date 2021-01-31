@@ -28,7 +28,8 @@ Load the package.
 library(bRacatus)
 ```
 
-## Example 1 - Here we will calculate the estimated accuracy and biogeographical status of each point record available on GBIF for the plant species *Babiana tubulosa*. Our reference regions in this example are checklists provided to the *bRacatus* package by the Global Inventory of Floras and Traits (GIFT).
+## Example 1
+Here we will calculate the estimated accuracy and biogeographical status of each point record available on GBIF for the plant species *Babiana tubulosa*. Our reference regions in this example are checklists provided to the *bRacatus* package by the Global Inventory of Floras and Traits (GIFT).
 
 1 - Use the function *getOcc* to obtain the GBIF records available for the species. This function is a modified version of *occ_search* in the *rgbif* package, which you have used yesterday.
 
@@ -88,7 +89,8 @@ plotBiogeoStatus (biogeo)
 ```
 
 
-## Example 2 - In this example, we will use the species range map instead of checklists to calculate the estimated accuracy and biogeographical status of each point record available on GBIF for the mammal species *Phalanger orientalis*. Our tests indicate that models using range maps instead of checklists have performed better! Unfortunately, there are two caveats: 1- for most species there are no good range maps available; 2- we still don't have an automatic way of querying those data. Here we will use an example that comes with *bRacatus*. Further in this documents we will talk about how the user can introduce their own range maps.
+## Example 2
+In this example, we will use the species range map instead of checklists to calculate the estimated accuracy and biogeographical status of each point record available on GBIF for the mammal species *Phalanger orientalis*. Our tests indicate that models using range maps instead of checklists have performed better! Unfortunately, there are two caveats: 1- for most species there are no good range maps available; 2- we still don't have an automatic way of querying those data. Here we will use an example that comes with *bRacatus*. Further in this documents we will talk about how the user can introduce their own range maps.
 
 
 1- Get data from GBIF!
