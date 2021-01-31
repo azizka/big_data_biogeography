@@ -41,7 +41,8 @@ install.packages(c(
   "coda", 
   "sm", 
   "vioplot",
-  "taxize")
+  "taxize",
+  "bRacatus")
 )
 
 library(devtools)
