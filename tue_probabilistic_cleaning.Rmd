@@ -1,5 +1,15 @@
 ---
+title: "Probabilistic cleaning with bRacatus"
 output: html_document
 ---
 
-TBA
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval=FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+## Background
+Georeferenced biological data of species distributions, abundances, or traits are critical for ecological and evolutionary research. However, the accuracy (true vs. false records) and biogeographical status (native vs. alien) of individual georeferenced records are often unclear, which limits their use in distribution modelling, analyses of biodiversity change, and other applications. The bRacatus method and R package allow to estimate a given georeferenced record’s probability of being true or false and of corresponding to a native or an alien occurrence. The framework avoids artificial thresholds of data filtering and instead implements a probabilistic framework which allows propagating uncertainties in subsequent analyses. The method relies on either species' range maps or regional checklists of native and alien species distributions. The article describing the methods is currently under review ("bRacatus: a method to estimate the accuracy and biogeographical status of georeferenced biological data) and the tutorial is available [here](https://github.com/azizka/sampbias/wiki). **NOTE SampBias is only available as beta version**
