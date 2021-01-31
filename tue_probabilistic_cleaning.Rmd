@@ -119,7 +119,7 @@ plotOcc (pts3)  # Running time: < 1s.
 ```
 
 
-2- Loading and visualising the reference regions. This part is not reproducible for other species, it's just the example that comes we the package. We will get to that in the exercises. Also, do not worry about the function *rangeMaps* for now.
+3- Loading and visualising the reference regions. This part is not reproducible for other species, it's just the example that comes we the package. We will get to that in the exercises. Also, do not worry about the function *rangeMaps* for now.
 
 ```{r, warning = FALSE}
 ref_reg <- Range_Phalanger_orientalis
@@ -128,14 +128,14 @@ plotRefReg (range_map_ref_reg)  # Running time: < 1s.
 ```
 
 
-3- Calculate the signals. Or just load the object that is also already saved for this example (code = data(signals_3).)
+4- Calculate the signals. Or just load the object that is also already saved for this example (code = data(signals_3).)
 
 ```{r, eval = FALSE}
 signals_3 <- signalCalculation (range_map_ref_reg,pts3,biogeo = TRUE)   # Running time: ≈ 40s.
 ```
 
 
-4- Now we apply the models.
+5- Now we apply the models.
 
 ```{r}
 acc <- accuracy (signals_3)   # Running time: < 1s.
@@ -143,16 +143,98 @@ biogeo <- biogeoStatus (signals_3)   # Running time: < 1s.
 ```
 
 
-5- And now, the best part of working with biogeography: making maps!
+6- And now, the best part of working with biogeography: making maps!
 
-**Note** 
+**Notes** 
 
 These maps will look very different from those in the previous example. Also, the code to plot them is much longer. That's because I chose several parametres by not using the default arguments of the function. The options are easily available by using *?plotAccuracy* and *?plotBiogeoStatus*.
+
 
 ```{r}
 plotAccuracy (acc, regional=T, reg.by="points", borders=F, col.features="gray80", col.bg="white", plot.range=T, range=Range_Phalanger_orientalis, box=T)   # Running time: < 1s.
 
 plotBiogeoStatus (biogeo, regional=T, reg.by="points", borders=F, col.features="gray80", col.bg="white", plot.range=T, range=Range_Phalanger_orientalis, box=T)   # Running time: < 1s.
+```
+
+
+## Do it yourself!
+Now let's apply these tools to your own data! We need two types of data here: point records, and reference regions. The second type can be either range maps or checklists. Ideally we will work with species that have been recorded as introduced outside of their native ranges, in order to use both the tools available in this package.
+If you don't have your own data, don't worry. I'm not giving you the fish, but I'll teach you how to fish! The steps are basically the same from the examples, with some particularities that we will discuss case by case.
+
+
+1- **The point data**. If you have your own data, input it with the function *giveOcc*. In this example I use a fictional South American mammal species.
+
+If you want to use GBIF data, just use the function *getOcc* as we did before. However, don't forget that we also need the reference region data, so chose a species that has reference regions available, and ideally has native and alien distributions represented in these reference regions. You have three main options:
+
+a) You can chose a species from this list [here](file:///C:/Users/ca13kute/AppData/Local/Temp/Table_S2.pdf). All of them have range maps available on the IUCN website (more about getting these maps in the next step). Note two important column in this table: *Alien_range* where 1 means that the species is alien somewhere, those are the ones we want; *n_points* the number of points GBIF has for the species, we don't want too few nor way too many (10 - 500).
+
+b) If you don't mind working plants, the function *giftRegions* is an option to get checklists. 
+
+c) A third option is using the Global Register of Introduced and Invasive Species (GRIIS), that focus mostly on alien species that have become invasive, and provide checklists per country. The problem with GRIIS is that they don't inform the native range of the species, which means we have to find it ourselves.
+
+**Note**
+
+Pay attention to *giveOcc* arguments. If your columns are not named *species*, *longitude*, and *latitude*, you need to specify these arguments in the function. 
+
+```{r}
+pts <- getOcc ("Hemitriccus mirandae")   # Running time: ≈ 1s.
+
+invented_data <- data.frame(sps=rep("Equus acephalus",10),
+             lon=c(-43.2,-58.4,-56,-44,-54.5,-57.4,-60.1,-68.5,-71.3,-47.5),
+             lat=c(-22.9,-34.6,-34.8,-20,-25.5,-25.2,-3,-32.5,-41.1,-15.5),
+             gender=rep("female",10),head_size=rep("headless individual"))
+
+sps_occurrence <- giveOcc(invented_data,"sps","lon","lat")
+```
+
+
+2- *Reference regions*. 
+
+a) If you have your own range maps, or have downloaded them from the IUCN website [here](https://www.iucnredlist.org/resources/spatial-data-download), you first need to load it in the R session (using the function *readOGR* from the package *rgdal* for example). Once the range maps are loaded, you need to use the function *rangeMaps* to transform them into the artificial checklists, as we did in the second example, but pay attention to the arguments: *biogeo* where you need to inform the name of the column in the shapefile data.table that informs whether that portion of the range is native or alien; in the arguments *native* and *alien* inform the entries for the each of the two categories in the column.
+
+b) If you decided for using GIFT regions, you know what to do!
+
+c) The third option would apply for GRIIS like data, in which the regions in a list are countries. It is also the case of the example in this exercise. Use then the function *countryChecklist*, that has two arguments: *countries* which (not surprisingly) is a list of the countries where the species has been observed, and *biogeo_status* which is a list informing the biogeographical status of the species in each of the countries in the list. The status can be *native*, *alien* or *unknown* and must come in the same length and order as the countries.
+
+```{r, warning = FALSE}
+#inputing a range map (first load you range map)
+ref_reg <- Range_Phalanger_orientalis
+range_map_ref_reg <- rangeMaps(ref_reg)
+
+#using GIFT data
+ref_reg <- giftRegions ("Babiana tubulosa")
+
+#using lists per country
+ref_reg <- countryChecklist(                       countries=c("Brazil","Argentina","Uruguay","Paraguay"),
+biogeo_status=c("native","alien","unknown","native"))
+
+#visualising
+plotRefReg(ref_reg)  #it is not going to work! 
+```
+
+
+4- Calculate the signals.
+
+```{r, eval = FALSE}
+signals <- signalCalculation (ref_reg,sps_occurrence,biogeo = TRUE)   # Running time: ≈ 40s.
+```
+
+
+5- Apply the models.
+
+```{r}
+acc <- accuracy (signals_3)   # Running time: < 1s.
+biogeo <- biogeoStatus (signals_3)   # Running time: < 1s.
+```
+
+
+6- Now your own maps!
+
+
+```{r}
+plotAccuracy (acc, regional=T, reg.by="points", borders=T, col.features="cyan", col.bg="white", box=T)   # Running time: < 1s.
+
+plotBiogeoStatus (biogeo, regional=T, reg.by="country", borders=T, col.features="magenta", col.bg="white", box=F)   # Running time: < 1s.
 ```
 
 
