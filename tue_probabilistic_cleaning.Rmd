@@ -1,5 +1,240 @@
 ---
+title: "Probabilistic cleaning with bRacatus"
 output: html_document
 ---
 
-TBA
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval=FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+## Background
+Georeferenced biological data of species distributions, abundances, or traits are critical for ecological and evolutionary research. However, the accuracy (true vs. false records) and biogeographical status (native vs. alien) of individual georeferenced records are often unclear, which limits their use in distribution modelling, analyses of biodiversity change, and other applications. The *bRacatus* method and R package allow to estimate a given georeferenced record’s probability of being true or false and of corresponding to a native or an alien occurrence. The framework avoids artificial thresholds of data filtering and instead implements a probabilistic framework which allows propagating uncertainties in subsequent analyses. The method relies on either species' range maps or regional checklists of native and alien species distributions. The article describing the methods in detail is currently under revision, and unfortunately can not be shared before publication according to the publisher's rules ("bRacatus: a method to estimate the accuracy and biogeographical status of georeferenced biological data).
+
+## Learning objectives
+After this exercise you will be able to apply the *bRacatus* framework to estimate the **accuracy** and the **biogeographical status** of individual georeferenced records. 
+
+## Exercises
+Here we will use exemplary data (available in the package) to walk you through the main functions of *bRacatus*. You can find the R-package version of this tutorial [here](https://cran.r-project.org/web/packages/bRacatus/vignettes/Using_bRacatus.html)
+
+
+## Library setup
+Load the package.
+
+```{r setup}
+library(bRacatus)
+```
+
+## Example 1 - Here we will calculate the estimated accuracy and biogeographical status of each point record available on GBIF for the plant species *Babiana tubulosa*. Our reference regions in this example are checklists provided to the *bRacatus* package by the Global Inventory of Floras and Traits (GIFT).
+
+1 - Use the function *getOcc* to obtain the GBIF records available for the species. This function is a modified version of *occ_search* in the *rgbif* package, which you have used yesterday.
+
+```{r}
+pts <- getOcc ("Babiana tubulosa")
+```
+
+2 - Now let's visualise the data we have downloaded. The first line of code shows the most relevant columns of data referent to the first six occurrences. The second line uses the function *ploOcc* to produce a map showing the data. 
+
+Especially when working with large amounts of data points, I suggest you to use *CoordinateCleaner* after this step, to avoid spending time calculating the indices for records that will be discarded anyways!
+
+```{r}
+head(pts)[,c(1:4)]
+plotOcc (pts)
+```
+
+3 - Use the function *giftRegions* to obtain the regional checklists containing the focus species. The output is a list with three SpatialPolygonsDataFrame objects, one containing all the features of the regions where the species is present, one containing only the regions where the species is known to be native, and the last one containing the regions where it is alien.
+
+```{r, warning = FALSE}
+ref_reg <- giftRegions ("Babiana tubulosa")
+```
+
+4 - And we visualise the reference region data with the function *plotRefReg*. You will get a figure with three occurrence maps, showing the regions where the species is present, native, and alien.
+
+It is important to highlight that GIFT provides data from several origins, and although the data base is very well curated, it can be incomplete or contain errors or other kinds of data inaccuracy. At this step, a specialist's opinion about the quality of the checklists can be valuable.
+
+```{r}
+plotRefReg (ref_reg)
+```
+
+5- Now that we have both the point-records and the reference regions prepared for the model, we will use the function *signalCalculation* to. The output is the same data.frame of species occurrences with extra columns containing the location ID and presence signals for each point. If biogeo=TRUE, the  data.frame also includes the nativeness and alienness indices.
+
+**Notes** 
+
+a) biogeo=TRUE is the default of the function, if you are using *bRacatus* just to calculate the estimated accuracy of your point records, you will save computational time by setting biogeo=FALSE.
+
+b) This function uses a huge distance matrix hosted remotely. If the internet velocity prevents us from connecting to them all at the same time. You can also load the data for this example runing this line of code *data(signals)*
+
+```{r, eval = FALSE}
+signals <- signalCalculation (ref_reg,pts,biogeo = TRUE)
+```
+
+
+6- Now that we have calculated the three indices, we'll use the *presence* index to model the estimated accuracy of the records, and both the *nativeness* and *alieness* indices for their biogeographical status. The functions are *accuracy*, and *biogeoStatus*. The outputs of these functions are the dataFrame  downloaded from GBIF containing the species occurrence information and an extra column indicating the estimated accuracy and biogeographical status of each point, respectively.
+
+```{r}
+acc <- accuracy (signals)
+biogeo <- biogeoStatus (signals)
+```
+
+
+7- Visualise the results on a maps with functions *plotAccuracy* and *plotBiogeoStatus*. The maps show the modelled accuracy and biogeographical status of the records in the gradient from most likely false (0) to most likely true (1), and from most alien (0) to most likely native (1).
+
+```{r}
+plotAccuracy (acc)
+plotBiogeoStatus (biogeo)
+```
+
+
+## Example 2 - In this example, we will use the species range map instead of checklists to calculate the estimated accuracy and biogeographical status of each point record available on GBIF for the mammal species *Phalanger orientalis*. Our tests indicate that models using range maps instead of checklists have performed better! Unfortunately, there are two caveats: 1- for most species there are no good range maps available; 2- we still don't have an automatic way of querying those data. Here we will use an example that comes with *bRacatus*. Further in this documents we will talk about how the user can introduce their own range maps.
+
+
+1- Get data from GBIF!
+
+```{r}
+pts <- getOcc ("Phalanger orientalis")   # Running time: ≈ 1s.
+```
+
+
+2- This step simulates extra points merely for visualisation purposes.
+
+```{r}
+pts2 <- data.frame(species=pts$species,
+                       decimalLongitude=pts$decimalLongitude,
+                       decimalLatitude=pts$decimalLatitude,
+                       origin="GBIF")       # Running time: < 1s.
+
+extra_points <- data.frame(species="Phalanger orientalis",
+                           decimalLongitude=c(125.257,112.765,110.632,112.192,121.130,
+                                              142.607,126.877,164.761,109.036),
+                           decimalLatitude=c(8.261,2.396,-1.518,-7.821,-20.655,-13.639,
+                                             -17.904,-20.671,12.938),
+                           origin="Simulated")     # Running time: < 1s.
+
+pts3 <- rbind(pts2,extra_points)     # Running time: < 1s.
+
+plotOcc (pts3)  # Running time: < 1s.
+```
+
+
+3- Loading and visualising the reference regions. This part is not reproducible for other species, it's just the example that comes we the package. We will get to that in the exercises. Also, do not worry about the function *rangeMaps* for now.
+
+```{r, warning = FALSE}
+ref_reg <- Range_Phalanger_orientalis
+range_map_ref_reg <- rangeMaps(ref_reg)  # Running time: < 1s.
+plotRefReg (range_map_ref_reg)  # Running time: < 1s.
+```
+
+
+4- Calculate the signals. Or just load the object that is also already saved for this example (code = data(signals_3).)
+
+```{r, eval = FALSE}
+signals_3 <- signalCalculation (range_map_ref_reg,pts3,biogeo = TRUE)   # Running time: ≈ 40s.
+```
+
+
+5- Now we apply the models.
+
+```{r}
+acc <- accuracy (signals_3)   # Running time: < 1s.
+biogeo <- biogeoStatus (signals_3)   # Running time: < 1s.
+```
+
+
+6- And now, the best part of working with biogeography: making maps!
+
+**Notes** 
+
+These maps will look very different from those in the previous example. Also, the code to plot them is much longer. That's because I chose several parametres by not using the default arguments of the function. The options are easily available by using *?plotAccuracy* and *?plotBiogeoStatus*.
+
+
+```{r}
+plotAccuracy (acc, regional=T, reg.by="points", borders=F, col.features="gray80", col.bg="white", plot.range=T, range=Range_Phalanger_orientalis, box=T)   # Running time: < 1s.
+
+plotBiogeoStatus (biogeo, regional=T, reg.by="points", borders=F, col.features="gray80", col.bg="white", plot.range=T, range=Range_Phalanger_orientalis, box=T)   # Running time: < 1s.
+```
+
+
+## Do it yourself!
+Now let's apply these tools to your own data! We need two types of data here: point records, and reference regions. The second type can be either range maps or checklists. Ideally we will work with species that have been recorded as introduced outside of their native ranges, in order to use both the tools available in this package.
+If you don't have your own data, don't worry. I'm not giving you the fish, but I'll teach you how to fish! The steps are basically the same from the examples, with some particularities that we will discuss case by case.
+
+
+1- **The point data**. If you have your own data, input it with the function *giveOcc*. In this example I use a fictional South American mammal species.
+
+If you want to use GBIF data, just use the function *getOcc* as we did before. However, don't forget that we also need the reference region data, so chose a species that has reference regions available, and ideally has native and alien distributions represented in these reference regions. You have three main options:
+
+a) You can chose a species from this list [here](file:///C:/Users/ca13kute/AppData/Local/Temp/Table_S2.pdf). All of them have range maps available on the IUCN website (more about getting these maps in the next step). Note two important column in this table: *Alien_range* where 1 means that the species is alien somewhere, those are the ones we want; *n_points* the number of points GBIF has for the species, we don't want too few nor way too many (10 - 500).
+
+b) If you don't mind working plants, the function *giftRegions* is an option to get checklists. 
+
+c) A third option is using the Global Register of Introduced and Invasive Species (GRIIS), that focus mostly on alien species that have become invasive, and provide checklists per country. The problem with GRIIS is that they don't inform the native range of the species, which means we have to find it ourselves.
+
+**Note**
+
+Pay attention to *giveOcc* arguments. If your columns are not named *species*, *longitude*, and *latitude*, you need to specify these arguments in the function. 
+
+```{r}
+pts <- getOcc ("Hemitriccus mirandae")   # Running time: ≈ 1s.
+
+invented_data <- data.frame(sps=rep("Equus acephalus",10),
+             lon=c(-43.2,-58.4,-56,-44,-54.5,-57.4,-60.1,-68.5,-71.3,-47.5),
+             lat=c(-22.9,-34.6,-34.8,-20,-25.5,-25.2,-3,-32.5,-41.1,-15.5),
+             gender=rep("female",10),head_size=rep("headless individual"))
+
+sps_occurrence <- giveOcc(invented_data,"sps","lon","lat")
+```
+
+
+2- *Reference regions*. 
+
+a) If you have your own range maps, or have downloaded them from the IUCN website [here](https://www.iucnredlist.org/resources/spatial-data-download), you first need to load it in the R session (using the function *readOGR* from the package *rgdal* for example). Once the range maps are loaded, you need to use the function *rangeMaps* to transform them into the artificial checklists, as we did in the second example, but pay attention to the arguments: *biogeo* where you need to inform the name of the column in the shapefile data.table that informs whether that portion of the range is native or alien; in the arguments *native* and *alien* inform the entries for the each of the two categories in the column.
+
+b) If you decided for using GIFT regions, you know what to do!
+
+c) The third option would apply for GRIIS like data, in which the regions in a list are countries. It is also the case of the example in this exercise. Use then the function *countryChecklist*, that has two arguments: *countries* which (not surprisingly) is a list of the countries where the species has been observed, and *biogeo_status* which is a list informing the biogeographical status of the species in each of the countries in the list. The status can be *native*, *alien* or *unknown* and must come in the same length and order as the countries.
+
+```{r, warning = FALSE}
+#inputing a range map (first load you range map)
+ref_reg <- Range_Phalanger_orientalis
+range_map_ref_reg <- rangeMaps(ref_reg)
+
+#using GIFT data
+ref_reg <- giftRegions ("Babiana tubulosa")
+
+#using lists per country
+ref_reg <- countryChecklist(                       countries=c("Brazil","Argentina","Uruguay","Paraguay"),
+biogeo_status=c("native","alien","unknown","native"))
+
+#visualising
+plotRefReg(ref_reg)  #it is not going to work! 
+```
+
+
+4- Calculate the signals.
+
+```{r, eval = FALSE}
+signals <- signalCalculation (ref_reg,sps_occurrence,biogeo = TRUE)   # Running time: ≈ 40s.
+```
+
+
+5- Apply the models.
+
+```{r}
+acc <- accuracy (signals_3)   # Running time: < 1s.
+biogeo <- biogeoStatus (signals_3)   # Running time: < 1s.
+```
+
+
+6- Now your own maps!
+
+
+```{r}
+plotAccuracy (acc, regional=T, reg.by="points", borders=T, col.features="cyan", col.bg="white", box=T)   # Running time: < 1s.
+
+plotBiogeoStatus (biogeo, regional=T, reg.by="country", borders=T, col.features="magenta", col.bg="white", box=F)   # Running time: < 1s.
+```
+
+
