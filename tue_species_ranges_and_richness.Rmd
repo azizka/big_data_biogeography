@@ -12,7 +12,8 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, eval=FALSE,
 
 # Exercises
 1. Calculate the area of the EOO for all species in your group (`CalcRangeSize`)
-2. Do a preliminary conservation assessment of your group based on Criterion B using t
+
+2. Create a map of the occurrence distribution
 
 # Possible questions for your project
 * What is the maximum range size for a species in your group
@@ -43,3 +44,5 @@ rs_biome <- CalcRangeSize(dat, biome = biom)
 
 range <- data.frame(rs, rs_biome)
 ```
+
+# OUtput generated

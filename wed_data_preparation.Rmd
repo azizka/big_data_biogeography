@@ -175,36 +175,3 @@ write.table(as.data.frame(class), row.names = TRUE, col.names = FALSE, quote = F
 sink(NULL)
 
 ```
-
-## 3. Extract environmental data
-Linking species occurrences and evolution to environmental variables and quantifying species "niche" and its evolution is essential for many biogeographic questions. We will use the temperature range of species to reconstruct the evolution of temperature mean and variance using BITE tomorrow.
-
-```{r}
-# Load cleaned occurences
-occ <- read_csv("example_data/bombacoideae_occurrences_cleaned.csv")
-
-# Load environmental data
-env <- raster("example_data/wc2.0_bio_5m_01.tif")
-
-# Generate a spatial object with the coordinates
-pts <- occ %>% 
-  dplyr::select(decimallongitude, decimallatitude) %>% 
-  as.matrix()
-
-# Extract the environmental values
-ext <- raster::extract(env, pts) %>% 
-  enframe(name = NULL, value = "MAT") %>% 
-  mutate(MAT = round(MAT, 2))
-
-# Bind coordinates and environmental variables
-out <- bind_cols(dplyr::select(occ, species), ext)
-
-# Write to disk
-write.table(out, "example_data/bombacoideae_environment.txt", sep = " ", quote = FALSE)
-```
-
-
-
-
-
-

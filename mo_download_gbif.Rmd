@@ -36,7 +36,7 @@ In the following tutorial, we will go through the questions one-by-one. The sugg
 ##Library setup
 In this exercise we will use the rgbif library for communication with GBIF and the tidyverse library for data management.
 
-```{r setup, include=FALSE}
+```{r setup}
 library(rgbif)
 library(taxize)
 library(tidyverse)
@@ -50,7 +50,7 @@ GBIF hosts a large number of records and downloading all records might take some
 ```{r occ_count}
 #Search occurrence records
 dat <- occ_search(scientificName = "Ceiba pentandra", 
-                   return =  "data", limit = 1000)
+                  limit = 1000)
 
 nrow(dat) # Check the number of records
 head(dat) # Check the data
