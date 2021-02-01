@@ -362,16 +362,19 @@ $(document).ready(function () {
       <a href="wed_overview.html">Overview</a>
     </li>
     <li>
-      <a href="wed_taxonspecific_bioregionalization.html">1. Taxon-specific bioregionalization</a>
+      <a href="wed_bioregionalization.html">1. Taxon-specific bioregionalization</a>
     </li>
     <li>
-      <a href="wed_ancestral_areas_DEC.html">2. Reconstructing ancestral areas (DEC)</a>
+      <a href="wed_data_preparation.html">2. Data preparation</a>
     </li>
     <li>
-      <a href="wed_DEC_bsm.html">3. Estimating the number of shifts (DEC BSM)</a>
+      <a href="wed_ancestral_areas_DEC.html">3. Reconstructing ancestral areas (DEC)</a>
     </li>
     <li>
-      <a href="wed_diversification_rates_geosse.html">4. Diversification rate estimation (GeoSSE)</a>
+      <a href="wed_DEC_bsm.html">4. Estimating the number of shifts (DEC BSM)</a>
+    </li>
+    <li>
+      <a href="wed_diversification_rates_geosse.html">5. Diversification rate estimation (GeoSSE)</a>
     </li>
     <li>
       <a href="wed_further_reading">Further reading</a>
@@ -464,11 +467,16 @@ $(document).ready(function () {
 <h1>Tutorial</h1>
 <p>In the following tutorial, we will go through the questions one-by-one. The suggested answers are by no means the only correct ones.</p>
 <p>##Library setup In this exercise we will use the rgbif library for communication with GBIF and the tidyverse library for data management.</p>
+<pre class="r"><code>library(rgbif)
+library(taxize)
+library(tidyverse)
+library(rgdal)
+library(rgeos)</code></pre>
 <div id="download-data-for-a-single-species-we-saw-in-the-filedand-save-them-in-a-data.frame" class="section level2">
 <h2>1. Download data for a single species we saw in the filedand save them in a data.frame</h2>
 <p>GBIF hosts a large number of records and downloading all records might take some time (also the download limit using <code>occ_search</code> is 250,000), so it is worth checking first how many records are available. We do this using the <code>return</code> argument of the <code>occ_search</code> function, which will only return meta-data on the record. Chose a species from your project taxon, for demonstration will download records for the Malvaceae family. We’ll first download data for a single, wide-spread species, <em>Ceiba pentandra</em>. Note that here we limit the maximum number of records to 1000.</p>
 <pre class="r"><code># Search occurrence records
-dat &lt;- occ_search(scientificName = &quot;Ceiba pentandra&quot;, return = &quot;data&quot;, limit = 1000)
+dat &lt;- occ_search(scientificName = &quot;Ceiba pentandra&quot;, limit = 1000)$data
 
 nrow(dat)  # Check the number of records
 head(dat)  # Check the data

@@ -50,7 +50,7 @@ GBIF hosts a large number of records and downloading all records might take some
 ```{r occ_count}
 #Search occurrence records
 dat <- occ_search(scientificName = "Ceiba pentandra", 
-                  limit = 1000)
+                  limit = 1000)$data
 
 nrow(dat) # Check the number of records
 head(dat) # Check the data
