@@ -12,7 +12,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
 
 # Joint Bayesian estimation of speciation, dispersal and extinction rates: the GeoSSE model
 
-The GeoSSE model jointly infers area-specific speciation rates, dispersal rates and local extinction rates [(Goldberg et al. 2011)](https://academic.oup.com/sysbio/article/60/4/451/1611105). The `mcmc-SSE` program implements a Bayesian algorithm to infer these rates. 
+The GeoSSE model jointly infers area-specific speciation rates, dispersal rates and local extinction rates [(Goldberg et al. 2011)](https://academic.oup.com/sysbio/article/60/4/451/1611105). The `mcmc-SSE` program implements a Bayesian algorithm to infer these rates [(Silvestro et al. 2014)](https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12236). 
 
 The analysis requires a tree file, a table with the geographic ranges (species with no geographic data or not present in the tree will be automatically removed).
 
@@ -21,6 +21,7 @@ The analysis requires a tree file, a table with the geographic ranges (species w
 ```{r}
 library("diversitree")  
 library("picante")
+library("phytools")
 ```
 
 # Load mcmc-SSE library
@@ -49,16 +50,14 @@ Set working directory:
 setwd("my_path/example_files/")
 ```
 
-Define tree file (NEXUS format, can contain multiple trees)  
+Define tree object (can contain multiple trees, i.e. class "multiPhylo")  
 ```{r}
-tree_file  = "example_data/bromelioieae_consensus.tre"
+tree  <- read.tree("bombacoideae_phylogeny.tre")
 ```
 
-
-
-Define geographic range file (tab-separated text file). Geographic ranges are defined as 0 (present in area A), 1 (present in area B), 2 (present in area AB)  
+Define geographic ranges. Geographic ranges are defined as 0 (present in area A), 1 (present in area B), 2 (present in area AB)  
 ```{r}
-range_file = "example_data/traitGeoSSE.txt"
+range.data <- read.table(file="traitGeoSSE_owndataconverted.txt", h=T, row.names=1)
 ```
 
 State-specific taxon sampling (A, B, AB)  
@@ -68,13 +67,13 @@ sampling_fractions = c(0.7,0.8,1)
 
 Define output file name
 ```{r}
-mcmc.log = "bromeliad_geosse.log"
+mcmc.log = "bombacoideae_geosse.log"
 ```
 
-Run the analysis
+Run the analysis (you can increase the number of iterations to run a longer analysis and improve convergence)
 ```{r}
-run_mcmc_SSE(tree_file, 
-             range_file, 
+run_mcmc_SSE(tree, 
+             range.data, 
              model = "geosse",
              outfile = mcmc.log,
              iterations = 10000, 
@@ -108,7 +107,7 @@ delta_dispersal = post$dA - post$dB
 hist(delta_dispersal)
 ```
 
-Calculate posterior probability of dAB > dBA:
+Calculate the posterior probability of `dAB > dBA`:
 ```{r}
 length(delta_dispersal[delta_dispersal>0]) / length(delta_dispersal)
 ```
@@ -120,7 +119,7 @@ delta_extinction = post$xA - post$xB
 hist(delta_extinction)
 ```
 
-Calculate the posterior probability of xA > xB:
+Calculate the posterior probability of `xA > xB`:
 
 ```{r}
 length(delta_extinction[delta_extinction>0]) / length(delta_extinction)
@@ -128,10 +127,9 @@ length(delta_extinction[delta_extinction>0]) / length(delta_extinction)
 
 
 # Run on multiple trees
-If provided with a tree file that includes multiple trees the MCMC can run sequentially on different trees to account for phylogenetic uncertainty. The `burnin` defines how many initial MCMC iterations should be discarded (i.e. not saved in the log file) for each tree.
+If provided with a tree object that includes multiple trees (class "multiPhylo") the MCMC can run sequentially on different trees to account for phylogenetic uncertainty. The `burnin` defines how many initial MCMC iterations should be discarded (i.e. not saved in the log file) for each tree and `nTREES` defines on how many trees the analysis is run.
 
 ```{r}
-tree_file  = "bromelioieae_100.trees"  
-run_mcmc_SSE(tree_file, trait_file, model= "geosse", outfile = "bromeliad_geosse100.log", iterations = 10000, nTREES=5, burnin=100)
+run_mcmc_SSE(trees, range.data, model= "geosse", outfile = "geosse.log", iterations = 10000, nTREES=5, burnin=100)
 ```
 
