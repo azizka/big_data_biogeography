@@ -56,7 +56,7 @@ tipranges = getranges_from_LagrangePHYLIP(lgdata_fn=geogfn)
 ```{r}
 BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 
-# set the macimum number of areas. If you ahve many areas, you can set the amximum number of areas a species can occur in simultaneously. One possibility is to set this to the number of areas of the most widespread recent species.
+# set the maximum number of areas. If you have many areas, you can set the maximum number of areas a species can occur in simultaneously. One possibility is to set this to the number of areas of the most widespread recent species.
 max_range_size = 5 
 numstates_from_numareas(numareas=5, maxareas=5, include_null_range=TRUE)
 
