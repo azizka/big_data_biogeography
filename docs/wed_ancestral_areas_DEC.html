@@ -417,6 +417,27 @@ $(document).ready(function () {
     </li>
   </ul>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Bonus scripts
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="fr_overview.html">Bioregions species richness</a>
+    </li>
+    <li>
+      <a href="fr_overview.html">Richness maps by traits</a>
+    </li>
+    <li>
+      <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
+    </li>
+    <li>
+      <a href="fr_overview.html">Identifying areas of endemism</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -435,7 +456,7 @@ $(document).ready(function () {
 </div>
 
 
-<p>In this exercise you will run the DIspersal-Extinction-Cladogenesis model using the BioGeoBEARS R package.</p>
+<p>In this exercise you will run the Dispersal-Extinction-Cladogenesis model using the BioGeoBEARS R package.</p>
 <div id="library-setup" class="section level1">
 <h1>Library setup</h1>
 <pre class="r"><code>library(tidyverse)
@@ -465,8 +486,8 @@ library(viridis)</code></pre>
 trfn &lt;- &quot;example_data/bombacoideae_phylogeny.newick&quot;
 tr &lt;- read.tree(trfn)</code></pre>
 </div>
-<div id="define-the-grography-file" class="section level2">
-<h2>Define the grography file</h2>
+<div id="define-the-geography-file" class="section level2">
+<h2>Define the geography file</h2>
 <pre class="r"><code>geogfn &lt;- &quot;example_data/bombacoideae_biome_classification.txt&quot;
 
 # Look at your geographic range data:
@@ -476,7 +497,7 @@ tipranges = getranges_from_LagrangePHYLIP(lgdata_fn = geogfn)</code></pre>
 <h2>Set up the DEC model</h2>
 <pre class="r"><code>BioGeoBEARS_run_object = define_BioGeoBEARS_run()
 
-# set the macimum number of areas. If you ahve many areas, you can set the amximum number of areas a species can occur in simultaneously. One possibility is to
+# set the maximum number of areas. If you have many areas, you can set the maximum number of areas a species can occur in simultaneously. One possibility is to
 # set this to the number of areas of the most widespread recent species.
 max_range_size = 5
 numstates_from_numareas(numareas = 5, maxareas = 5, include_null_range = TRUE)
@@ -486,11 +507,11 @@ numstates_from_numareas(numareas = 5, maxareas = 5, include_null_range = TRUE)
 BioGeoBEARS_run_object$trfn = trfn
 BioGeoBEARS_run_object$geogfn = geogfn
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$min_branchlength = 1e-06
+BioGeoBEARS_run_object$min_branchlength = 1e-06  # fix issues with zero-branch lengths   
 BioGeoBEARS_run_object$include_null_range = TRUE
-BioGeoBEARS_run_object$speedup = TRUE  #
+BioGeoBEARS_run_object$speedup = TRUE
 BioGeoBEARS_run_object$use_optimx = &quot;GenSA&quot;  # if FALSE, use optim() instead of optimx()
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 4  # if parallel computing is not available this will default to 1
 BioGeoBEARS_run_object$force_sparse = FALSE
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE

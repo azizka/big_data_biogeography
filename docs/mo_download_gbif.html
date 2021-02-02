@@ -417,6 +417,27 @@ $(document).ready(function () {
     </li>
   </ul>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Bonus scripts
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="fr_overview.html">Bioregions species richness</a>
+    </li>
+    <li>
+      <a href="fr_overview.html">Richness maps by traits</a>
+    </li>
+    <li>
+      <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
+    </li>
+    <li>
+      <a href="fr_overview.html">Identifying areas of endemism</a>
+    </li>
+  </ul>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -537,11 +558,23 @@ occ_download(pred_in(&quot;taxonKey&quot;, unique(gbif_taxon_keys$usagekey)), pr
 <div id="download-records-for-a-higher-taxonomic-group-including-your-group-of-interest." class="section level2">
 <h2>4. Download records for a higher taxonomic group including your group of interest.</h2>
 <p>One way to focus the download is to focus on a specific region. Chose a focus for the higher taxon for your group of interest. For our example data we will download all occurrence records of Malvaceae from South America.</p>
-<p>You can now download the records for Brazil. Since we want to work with coordinates, we will only download those records that do have coordinates.</p>
+<p>You can now download the records for South America. Since we want to work with coordinates, we will only download those records that do have coordinates.</p>
 <pre class="r"><code>
 occ_download(pred_in(&quot;taxonKey&quot;, ID_fam$usagekey), pred(&quot;hasCoordinate&quot;, TRUE), pred(&quot;continent&quot;, &quot;South America&quot;), format = &quot;SIMPLE_CSV&quot;, user = user, pwd = pwd, 
     email = email)</code></pre>
-<p>That leaves us with records. If you are satisfied for your group you can go to the next step and save the data to the working directory. The limit for record searching using rgbif is 250,000 records, if your group has more records you may limit the geographic area to the north east of Brazil. To do this you can use the Well-known-text format (WKT) to specify an area. Here we use a very simple rectangle, feel free to experiment</p>
+<p>Often it is desirable to only obtain records for a custom geographic area. One option to achieve this is to download all data for a group and then subset using a user-defined polygon. However, rgbif/GBIF also provide the option to only download records from a custom area. To do this, you will need to define a polygon of the area of interst using the Well-known-text-format (WKT).To do this you can use the Well-known-text format (WKT) to specify an area. Here we use a very simple rectangle, feel free to experiment. The WKT format is a bit tricky, see the geometry section of <code>?occ_download</code> for more information.</p>
+<pre class="r"><code>study_area &lt;- &quot;POLYGON((-35 -4.5, -38.5 -4.5, -38.5 -7, -35 -7, -35 -4.5))&quot;
+
+occ_download(pred_in(&quot;taxonKey&quot;, ID_fam$usagekey), pred(&quot;hasCoordinate&quot;, TRUE), pred_within(study_area), format = &quot;SIMPLE_CSV&quot;, user = user, pwd = pwd, email = email)
+</code></pre>
+<p>If you have a more complex polygon, it is often easier to define it in a graphical user interface software, for instance google earth, and import the resulting .kml or.shp file into R using the <code>readOGR</code> function of the <code>rgdal</code> library and convert it into WKT format using <code>writeWKT</code> from the <code>rgeos</code> package.</p>
+<pre class="r"><code>amz &lt;- readOGR(&quot;example_data/day1_biodiversity_databases/Amazonia.kml&quot;)
+# or for shape files: amz &lt;- readOGR(&#39;inst&#39;, layer = &#39;Amazonia&#39;)
+
+study_area &lt;- rgeos::writeWKT(amz)
+
+occ_download(pred_in(&quot;taxonKey&quot;, ID_fam$usagekey), pred(&quot;hasCoordinate&quot;, TRUE), pred_within(study_area), format = &quot;SIMPLE_CSV&quot;, user = user, pwd = pwd, email = email)
+</code></pre>
 </div>
 <div id="save-the-downloaded-data-as-.csv-to-the-working-directory." class="section level2">
 <h2>5. Save the downloaded data as .csv to the working directory.</h2>

@@ -72,11 +72,15 @@ navbar:
     - text: Student presentations
       href: fr_presentations.html
   - text: Bonus scripts
+    menu:
     - text: Bioregions species richness
+      href: fr_overview.html
     - text: Richness maps by traits
+      href: fr_overview.html
     - text: Extracting environmental data
       href: bon_extracting_environmental_data.html
     - text: Identifying areas of endemism
+      href: fr_overview.html
 
   right:
   - text: GitHub

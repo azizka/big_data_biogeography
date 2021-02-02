@@ -11,7 +11,7 @@
 
 
 
-<title>Course schedule</title>
+<title>Obtaining environmental data</title>
 
 <script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -452,102 +452,53 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Course schedule</h1>
+<h1 class="title toc-ignore">Obtaining environmental data</h1>
 
 </div>
 
 
-<p>The five days of this course are split in a synchronous block with live lectures, software demonstrations and small guided exercises and an asynchronous block with exercises you can do individually or in small groups. The synchronous part will take place every day between 13:00-17:00 CET. You can do the exercises of the asynchronous block at anytime, ideally the same day after the lectures, if your time zone allows. Alex and Daniele will be available on slack to answer questions on the asynchronous part every day from 09:00-12:00 CET.</p>
-<div id="before-the-course" class="section level1">
-<h1>Before the course</h1>
-<ul>
-<li><p>Registration at www.gbif.org and www.iucnredlist.org</p></li>
-<li><p>Software installation (R, Rstudio, Python)</p></li>
-<li><p>Preparation of study group &amp; project</p></li>
-<li><p>Course literature</p></li>
-</ul>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>Linking species occurrences and evolution to environmental variables and quantifying species “niche” and its evolution is essential for many biogeographic questions.</p>
 </div>
-<div id="day-1---biodiversity-databases" class="section level1">
-<h1>Day 1 - Biodiversity databases</h1>
-<p>Lectures (live)</p>
-<ul>
-<li><p>Welcome &amp; Introduction</p></li>
-<li><p>Lecture “Recent developments in big data biogeography”</p></li>
-<li><p>Student projects</p></li>
-<li><p>Lecture &amp; Hand-on Biodiversity databases</p></li>
-<li><p>Hands-on “Obtaining biodiversity data in R”</p></li>
-</ul>
-<p>Exercises (asynchronous):</p>
+<div id="objective" class="section level1">
+<h1>Objective</h1>
+<p>After this exercise, you will be able to extract environmental data from for geographic coordinates.</p>
+</div>
+<div id="exercise" class="section level1">
+<h1>Exercise</h1>
 <ol style="list-style-type: decimal">
-<li><p>Help with software set up</p></li>
-<li><p>Obtaining data from GBIF in R</p></li>
-<li><p>Obtaining data from PaleoDB in R</p></li>
-<li><p>Obtaining data from the IUCN red list in R</p></li>
+<li>Download global environmental data from the <a href="http://chelsa-climate.org/">CHELSA</a> project or <a href="https://worldclim.org/version2">worldclim 2</a>.</li>
+<li>Load the data into R and extract the mean annual temperature for your locations (<code>raster</code>, <code>read_csv</code>, <code>extract</code>)</li>
 </ol>
 </div>
-<div id="day-2---recent-biogeography" class="section level1">
-<h1>Day 2 - Recent biogeography</h1>
-<p>Lectures (live)</p>
-<ul>
-<li><p>Questions from yesterday/</p></li>
-<li><p>Lecture “Data quality and sampling bias”</p></li>
-<li><p>Demonstration</p></li>
-<li><p>Lecture "Bracatus: a method for probabilistic quality assessment of biogeographic records (Eduardo, 30 min)</p></li>
-<li><p>Demonstration</p></li>
-</ul>
-<p>Exercises (asynchronous)</p>
-<ol style="list-style-type: decimal">
-<li><p>Cleaning geographic records from public databases</p></li>
-<li><p>Cleaning fossil data</p></li>
-<li><p>Probabilistic cleaning with Bracatus</p></li>
-<li><p>Quantifying sampling bias in datasets of occurrence records</p></li>
-<li><p>Species richness and range size</p></li>
-</ol>
+<div id="tutorial" class="section level1">
+<h1>Tutorial</h1>
+<p>Once you downloaded the environmental data, it is straightforward to extract values for geographic coordinates. The <code>raster</code> package will help you to handle environmental data in R and extract the values for your coordinates.</p>
+<div id="load-environmental-data" class="section level2">
+<h2>Load environmental data</h2>
+<pre class="r"><code>library(raster)
+library(tidyverse)
+
+occ &lt;- read_csv(&quot;example_data/bonus/cleaned_occurrences_bombacoideae.csv&quot;)
+env &lt;- raster(&quot;example_data/bonus/wc2.0_bio_5m_01.tif&quot;)</code></pre>
 </div>
-<div id="day-3---historical-biogeography" class="section level1">
-<h1>Day 3 - Historical Biogeography</h1>
-<p>Lectures (live)</p>
-<ul>
-<li><p>Lecture “Data driven bioregionalization”</p></li>
-<li><p>Demonstration</p></li>
-<li><p>Lecture “Historical biogeography – methods to model the evolution of geographic ranges through time”</p></li>
-<li><p>Demonstration BiogeogrBEARS/ DEC</p></li>
-</ul>
-<p>Exercises (asynchronous)</p>
-<ol style="list-style-type: decimal">
-<li><p>Taxon-specific bioregionalization: Infomap Bioregions &amp; phyloregion</p></li>
-<li><p>Reconstructing ancestral areas (DEC)</p></li>
-<li><p>Estimating the number of shifts (DEC BSM)</p></li>
-<li><p>Diversification rate estimation (GeoSSE)</p></li>
-</ol>
+<div id="extract-values" class="section level2">
+<h2>Extract values</h2>
+<pre class="r"><code># Generate a spatial object with the coordinates
+pts &lt;- occ %&gt;% dplyr::select(decimalLongitude, decimalLatitude) %&gt;% as.matrix()
+
+# Extract the environmental values
+ext &lt;- raster::extract(env, pts) %&gt;% enframe(name = NULL, value = &quot;MAT&quot;)
+
+# Bind coordinates and environmental variables
+out &lt;- bind_cols(occ, ext)
+</code></pre>
 </div>
-<div id="day-4---conservation-assessments" class="section level1">
-<h1>Day 4 - Conservation assessments</h1>
-<p>Lectures (live)</p>
-<ul>
-<li><p>Lecture “IUCN conservation assessments/automated assessments”</p></li>
-<li><p>Lecture “Classification and neural networks”</p></li>
-<li><p>Demonstration “Automated assessments following IUCN Criterion B”</p></li>
-<li><p>Demonstration "Automated assessments using Neural networks (IUCNN)</p></li>
-</ul>
-<p>Exercises (asynchronous)</p>
-<ol style="list-style-type: decimal">
-<li><p>Automated conservation assessments following criterion B (rCat/ConR)</p></li>
-<li><p>Automated conservation assessments using neural networks</p></li>
-</ol>
+<div id="write-to-disk" class="section level2">
+<h2>Write to disk</h2>
+<pre class="r"><code>write_csv(out, &quot;output/records+environment.csv&quot;)</code></pre>
 </div>
-<div id="day-5---wrap-up-and-project-work" class="section level1">
-<h1>Day 5 - Wrap up and project work</h1>
-<p>Lectures (live)</p>
-<ul>
-<li><p>Student presentations (7-10 minutes each)</p></li>
-<li><p>Wrap up and course evaluation</p></li>
-</ul>
-<p>Exercises (asynchronous)</p>
-<ol style="list-style-type: decimal">
-<li><p>Time to catch up</p></li>
-<li><p>Work on project &amp; presentation preparation</p></li>
-</ol>
 </div>
 
 
