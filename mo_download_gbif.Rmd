@@ -145,7 +145,7 @@ occ_download(
 One way to focus the download is to focus on a specific region. Chose a focus for the higher taxon for your group of interest. For our example data we will download all occurrence records of Malvaceae from South America.
 
 
-You can now download the records for Brazil. Since we want to work with coordinates, we will only download those records that do have coordinates.
+You can now download the records for South America. Since we want to work with coordinates, we will only download those records that do have coordinates.
 ```{r}
 
 occ_download(
@@ -159,7 +159,43 @@ occ_download(
 )
 ```
 
-That leaves us with records. If you are satisfied for your group you can go to the next step and save the data to the working directory. The limit for record searching using rgbif is 250,000 records, if your group has more records you may limit the geographic area to the north east of Brazil. To do this you can use the Well-known-text format (WKT) to specify an area. Here we use a very simple rectangle, feel free to experiment
+Often it is desirable to only obtain records for a custom geographic area. One option to achieve this is to download all data for a group and then subset using a user-defined polygon. However, rgbif/GBIF also provide the option to only download records from a custom area. To do this, you will need to define a polygon of the area of interst using the Well-known-text-format (WKT).To do this you can use the Well-known-text format (WKT) to specify an area. Here we use a very simple rectangle, feel free to experiment. The WKT format is a bit tricky, see the geometry section of `?occ_download` for more information. 
+
+```{r, eval=FALSE}
+study_area <- "POLYGON((-35 -4.5, -38.5 -4.5, -38.5 -7, -35 -7, -35 -4.5))"
+
+occ_download(
+  pred_in("taxonKey", ID_fam$usagekey),
+  pred("hasCoordinate", TRUE),
+  pred_within(study_area),
+  format = "SIMPLE_CSV",
+  user=user,
+  pwd=pwd,
+  email=email
+)
+
+```
+
+If you have a more complex polygon, it is often easier to define it in a graphical user interface software, for instance google earth, and import the resulting .kml or.shp file into R using the `readOGR` function of the `rgdal` library and convert it into WKT format using `writeWKT` from the `rgeos` package.
+
+```{r, eval=FALSE}
+amz <- readOGR("example_data/day1_biodiversity_databases/Amazonia.kml")
+#or for shape files:
+#amz <- readOGR("inst", layer = "Amazonia")
+
+study_area <- rgeos::writeWKT(amz)
+
+occ_download(
+  pred_in("taxonKey", ID_fam$usagekey),
+  pred("hasCoordinate", TRUE),
+  pred_within(study_area),
+  format = "SIMPLE_CSV",
+  user=user,
+  pwd=pwd,
+  email=email
+)
+
+```
 
 ## 5. Save the downloaded data as .csv to the working directory.
 You can download the dataset via your account at www.gbif.org.

@@ -81,9 +81,9 @@ summary(bias.out)
 plot(bias.out)
 ```
 
-## 4. Explore `?SamplingBias` and try to change the relevant arguments and the study extent to improve the results. Summarize and visualize again.
+## 4. Explore `?calculate_bias` and try to change the relevant arguments and the study extent to improve the results. Summarize and visualize again.
 ```{r, message = F, warning = F, eval=F}
-?calculate_bias
+?calculate_bias()
 ```
 
 ## 5. Explore the Bio-Dem app to explore the effect of political factors on data collections in your group. 

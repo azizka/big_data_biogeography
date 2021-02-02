@@ -1,0 +1,199 @@
+---
+title: "Areas of endemism"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+# Background
+Areas of endemism are often of particular interest for biogeography and conservation. One qay to quantify endemsim is wieghted endemism (Laffan et al, 2001, https://doi.org/10.1046/j.1365-2699.2001.00524.x) as implemented in R (Guerin et al 2015a, https://doi.org/10.1111/2041-210X.12361) with option to correct forcorrection for total species richness.
+
+
+# Tutorial
+Usually more detailed distribution maps (for instsance from species distribution models) would be used, bu here we will use the cleaned data from www.gbif.org as an example. 
+
+
+# Load libraries and some background data
+```{r}
+library(raster)
+library(tidyverse)
+library(viridis)
+library(ggthemes)
+library(cowplot)
+library(rgdal)
+#install.packages("input/adehabitat_1.8.20.tar.gz", repos = NULL, type = "source") 
+
+wgs1984 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+behr <- '+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs'
+
+be <- raster("input/ABROCOMIDAE_ABROCOMIDAE.tif")
+```
+
+```{r}
+## reproject
+wgs1984 <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+behr <- '+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs'
+
+be <- raster("input/ABROCOMIDAE_ABROCOMIDAE.tif")
+
+# Weightened endemism following Guerin et al (https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12361)
+
+## get occurrence recods from the ranges for each raster cell
+
+
+
+# LONG ANALYSIS!
+#bromeli <- readOGR(dsn = "output/bromeliaceae_ranges_with_data", layer = "bromeliaceae_ranges_with_data")
+load("output/bromeliaceae_ranges_with_data.rda")
+
+bromeli <- as(bromeli, "Spatial")
+bromeli <- spTransform(bromeli, CRS(behr))
+
+we_in <-  data.frame()
+
+for(i in 1:nrow(bromeli)){
+  print(i)
+  ras <- bromeli[i,]
+  ras <- rasterize(ras, be, getCover = TRUE)
+  #num <- 1 / sum(getValues(ras) >= 0.25)
+  ras[ras < 0.25] <- 0
+  ras[ras > 0.25] <- 1
+
+  out <- data.frame(
+    species = bromeli[i,]$tax_accepted_name,
+    rasterToPoints(ras))%>%
+    filter(layer > 0 ) %>%
+    dplyr::select(-layer)
+
+  we_in <- bind_rows(we_in, out)
+}
+
+save(we_in, file = "output/occurrences_from_ranges_for_we.rda")
+
+
+# convert to behrmann
+load("output/occurrences_from_ranges_for_we.rda")
+we <- weighted.endemism(species_records = we_in,
+                        species="species", 
+                        longitude="x",
+                        latitude="y",
+                        frame.raster = be)
+
+plot(we$WE_raster)
+writeRaster(we$WE_raster, 
+            filename = "output/weightend_endemism_raster",
+            overwrite = T, 
+            format = "ascii")
+
+# compare to null distribution
+
+we_test <- endemism.null.test(we, nrep = 100, outlier.range = 1.5)
+
+writeRaster(we_test$P.above.raster, 
+            filename = "output/weightend_endemism_raster_pvalues",
+            overwrite = T, 
+            format = "ascii")
+
+
+# BACkground maps
+world.inp  <- rnaturalearth::ne_download(scale = 50,
+                                         type = 'land',
+                                         category = 'physical',
+                                         load = TRUE)
+
+count.inp  <- rnaturalearth::ne_download(scale = 110,
+                                         type = 'countries',
+                                         load = TRUE)
+
+bra <- readOGR(dsn = "input", layer = "ne_10m_admin_1_states_provinces_lines")
+bra <- bra[bra@data$adm0_a3 == "BRA",]
+bra <-  raster::getData("GADM", country = "BRA", level = 1)
+
+world.behr <- spTransform(world.inp, CRS(behr)) %>% fortify()
+count.behr <- spTransform(count.inp, CRS(behr)) %>% fortify()
+bra.behr <- spTransform(bra, CRS(behr)) %>% fortify()
+
+# Supplementary figure weighted endemism
+plo <- data.frame(rasterToPoints(we$WE_raster))%>%
+  rename(we = ABROCOMIDAE_ABROCOMIDAE) %>% 
+  filter(we > 0 )
+
+plo_we <- ggplot()+
+  geom_tile(data = plo, aes(x = x, y = y, fill = we))+
+  scale_fill_viridis(name = "Weighted endemism", direction = -1, na.value = "transparent")+
+  geom_polygon(data = world.behr,
+               aes(x = long, y = lat, group = group), fill = "transparent", color = "black")+
+  xlim(-12000000, -3000000)+
+  ylim(-6500000, 4500000)+
+  coord_fixed()+
+  #ggtitle("Corrected Weighted Endemism")+
+  theme_map()+
+  theme(legend.justification = c(0, 0), 
+        legend.position = c(0, 0))
+
+ggsave(filename = "output/submission/Supplementary_figure_weighted_Endemism.jpg", plot = plo_we, height = 11, width = 8)
+
+# Figure genus richness and endemsim test
+
+ri_gen <-  raster("output/submission/richness_raster_bromeliaceae_genera_ranges")
+
+plo_gen <- data.frame(rasterToPoints(ri_gen))%>%
+  filter(layer > 0 )
+
+plo_gen <- ggplot()+
+  # geom_polygon(data = world.behr,
+  #              aes(x = long, y = lat, group = group), fill = "transparent", color = "black")+
+  geom_tile(data = plo_gen, aes(x = x, y = y, fill = layer), alpha = 1)+
+  geom_polygon(data = count.behr,
+               aes(x = long, y = lat, group = group), fill = "transparent", color = "grey20")+
+  geom_polygon(data = bra.behr,
+               aes(x = long, y = lat, group = group), fill = "transparent", color = "grey20")+
+  scale_fill_viridis(name = "Genera", direction = -1, na.value = "transparent")+
+  xlim(-12000000, -3000000)+
+  ylim(-6500000, 4500000)+
+  coord_fixed()+
+  #ggtitle("Bromeliaceae")+
+  theme_map()+
+  theme(legend.justification = c(0, 0), 
+        legend.position = c(0, 0))
+
+
+plo_wep <- data.frame(rasterToPoints(we_test$P.above.raster))%>%
+  rename(we_p = ABROCOMIDAE_ABROCOMIDAE) %>% 
+  filter(we_p > 0 ) %>% 
+  mutate(we_pcat = ifelse(we_p < 0.025, "High", we_p)) %>%
+  mutate(we_pcat = ifelse(we_p > 0.975, "Low", we_pcat)) %>% 
+  mutate(we_pcat = ifelse(we_p < 0.975 & we_p > 0.025, "Not significant", we_pcat))
+
+
+plo_wep <- ggplot()+
+  # geom_polygon(data = world.behr,
+  #              aes(x = long, y = lat, group = group), fill = "transparent", color = "black")+
+  geom_tile(data = plo_wep, aes(x = x, y = y, fill = we_pcat), alpha = 1)+
+  geom_polygon(data = count.behr,
+               aes(x = long, y = lat, group = group), fill = "transparent", color = "grey20")+
+  geom_polygon(data = bra.behr,
+               aes(x = long, y = lat, group = group), fill = "transparent", color = "grey20")+
+  #scale_fill_viridis(name = "Genera", direction = -1, na.value = "transparent")+
+  scale_fill_brewer(name = "Weighted Endemism", palette = "Set1")+
+  xlim(-12000000, -3000000)+
+  ylim(-6500000, 4500000)+
+  coord_fixed()+
+  #ggtitle("Bromeliaceae")+
+  theme_map()+
+  theme(legend.justification = c(0, 0), 
+        legend.position = c(0, 0))
+
+
+plo_end <- plot_grid(plo_gen, plo_wep,
+                      labels = c('(a) Genus richness',
+                                 '(b) Weighted endemism'), ncol = 2, hjust = 0)
+
+
+ggsave(filename = "output/submission/Figure_genus_richness_weighted_endemism.pdf", plot = plo_end, dpi = 600)
+```

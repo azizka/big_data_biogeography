@@ -18,7 +18,7 @@ After this day you will be able to:
 
 ### Lectures (live)
 13:15 - 15:00
-- Lecture "Data quality and sampling bias"
+- Lecture "Challenges to spatial big data in biogeography and tools to address them"
 - Demonstration + hands on in break out rooms 
 
 15:00 - 17:00
