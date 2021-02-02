@@ -43,7 +43,7 @@ trfn <- "example_data/bombacoideae_phylogeny.newick"
 tr <- read.tree(trfn)
 ```
 
-## Define the grography file
+## Define the geography file
 ```{r}
 geogfn <- "example_data/bombacoideae_biome_classification.txt"
 
