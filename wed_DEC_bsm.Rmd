@@ -88,7 +88,7 @@ save(ana_events_tables, file ="example_data/bombacoideae_BSMana_events_table_mcc
 ```
 
 ## Calculate the number of dispersal through time
-The following functions calaculates the number of estimated dispersals through time relative to the total branch length across time bins. 
+The following function calculates the number of estimated dispersals through time relative to the total branch length across time bins. 
 The function requires the `BSM_output` and `res` objects created in the previous steps. 
 Additionally you can adjust the max age (based on the root age of your tree) and the bin size. 
 ```{r}
