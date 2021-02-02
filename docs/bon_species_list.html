@@ -11,7 +11,7 @@
 
 
 
-<title>ToDo.utf8</title>
+<title>A species list from a higher rank taxon name</title>
 
 <script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -23,6 +23,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -450,12 +452,40 @@ $(document).ready(function () {
 
 
 
+<h1 class="title toc-ignore">A species list from a higher rank taxon name</h1>
 
 </div>
 
 
-<p>Alex - Set up github repo for this year based on the repository from 2019 - Define the new time table - Send an email to all students, incuding: - invitation to slack - instructions to install Rstudio and R - instructions on which packages to install - Instructiont for the project design - Information on the first day - Information on how we will work during the course - Ask them to create an IUCN account - ask them to create a gbif account - set up a google doc to work on the schedule and the todo for daniele and me - gap analysis which lectures and tutorials need to be updated from last time? - update relevant lectures and tutorials -ask to eduardo</p>
-<p>Daniele</p>
+<p>The taxize package enables you to get a list of daughter taxa from a higher taxonomic name. You will have to decide for a taxonomic to rely on. In this example we will use th GBIF backbone since we are working with GBIF data, but others may be more suitable for other applications. Options include ITIS, NCBI, WORMS, BOLD.</p>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<pre class="r"><code>library(rgbif)
+library(taxize)
+library(tidyverse)</code></pre>
+</div>
+<div id="obtain-species-list" class="section level1">
+<h1>Obtain species list</h1>
+<pre class="r"><code># get the GBIF ID first, as done in the exercise from day 1
+ID&lt;- taxize::get_gbifid_(&quot;Ixodidae&quot;, method=&quot;backbone&quot;)%&gt;% 
+  bind_rows() %&gt;% # get_gbifid_ returns a list, convert to data.frame
+  filter(matchtype == &quot;EXACT&quot; &amp; status == &quot;ACCEPTED&quot;) # filter data
+
+# get all species with in this taxon
+# the donstream function will find species for you
+splist &lt;- downstream(sci_id = ID$usagekey,
+                     db = &quot;gbif&quot;,
+                     downto = &quot;species&quot;,
+                     intermediate = FALSE,
+                     rows = NA)[[1]]
+
+# You may want to remove certain species from the list again
+splist &lt;- splist %&gt;% 
+  filter(!name %in% c(&quot;Amblyomma albopictum&quot;, &quot;Dermacentor abaensis&quot;)) #the names of the species to remove here
+
+# write to disk
+write_csv(splist, &quot;species_list.csv&quot;)</code></pre>
+</div>
 
 
 

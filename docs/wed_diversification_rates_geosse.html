@@ -425,10 +425,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="fr_overview.html">Bioregions species richness</a>
+      <a href="bon_species_list.html">Obtaining a species list</a>
     </li>
     <li>
-      <a href="fr_overview.html">Richness maps by traits</a>
+      <a href="bon_species_richness_ecoregions.html">Species richness per ecoregion</a>
     </li>
     <li>
       <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
@@ -458,13 +458,14 @@ $(document).ready(function () {
 
 <div id="joint-bayesian-estimation-of-speciation-dispersal-and-extinction-rates-the-geosse-model" class="section level1">
 <h1>Joint Bayesian estimation of speciation, dispersal and extinction rates: the GeoSSE model</h1>
-<p>The GeoSSE model jointly infers area-specific speciation rates, dispersal rates and local extinction rates <a href="https://academic.oup.com/sysbio/article/60/4/451/1611105">(Goldberg et al. 2011)</a>. The <code>mcmc-SSE</code> program implements a Bayesian algorithm to infer these rates.</p>
+<p>The GeoSSE model jointly infers area-specific speciation rates, dispersal rates and local extinction rates <a href="https://academic.oup.com/sysbio/article/60/4/451/1611105">(Goldberg et al. 2011)</a>. The <code>mcmc-SSE</code> program implements a Bayesian algorithm to infer these rates <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/evo.12236">(Silvestro et al. 2014)</a>.</p>
 <p>The analysis requires a tree file, a table with the geographic ranges (species with no geographic data or not present in the tree will be automatically removed).</p>
 </div>
 <div id="load-dependent-libraries" class="section level1">
 <h1>Load dependent libraries:</h1>
 <pre class="r"><code>library(&quot;diversitree&quot;)
-library(&quot;picante&quot;)</code></pre>
+library(&quot;picante&quot;)
+library(&quot;phytools&quot;)</code></pre>
 </div>
 <div id="load-mcmc-sse-library" class="section level1">
 <h1>Load mcmc-SSE library</h1>
@@ -486,16 +487,16 @@ write.table(geosse_areas, file = &quot;example_data/traitGeoSSE_owndataconverted
 <h1>Setup an analysis</h1>
 <p>Set working directory:</p>
 <pre class="r"><code>setwd(&quot;my_path/example_files/&quot;)</code></pre>
-<p>Define tree file (NEXUS format, can contain multiple trees)</p>
-<pre class="r"><code>tree_file = &quot;example_data/bromelioieae_consensus.tre&quot;</code></pre>
-<p>Define geographic range file (tab-separated text file). Geographic ranges are defined as 0 (present in area A), 1 (present in area B), 2 (present in area AB)</p>
-<pre class="r"><code>range_file = &quot;example_data/traitGeoSSE.txt&quot;</code></pre>
+<p>Define tree object (can contain multiple trees, i.e. class “multiPhylo”)</p>
+<pre class="r"><code>tree &lt;- read.tree(&quot;bombacoideae_phylogeny.tre&quot;)</code></pre>
+<p>Define geographic ranges. Geographic ranges are defined as 0 (present in area A), 1 (present in area B), 2 (present in area AB)</p>
+<pre class="r"><code>range.data &lt;- read.table(file = &quot;traitGeoSSE_owndataconverted.txt&quot;, h = T, row.names = 1)</code></pre>
 <p>State-specific taxon sampling (A, B, AB)</p>
 <pre class="r"><code>sampling_fractions = c(0.7, 0.8, 1)</code></pre>
 <p>Define output file name</p>
-<pre class="r"><code>mcmc.log = &quot;bromeliad_geosse.log&quot;</code></pre>
-<p>Run the analysis</p>
-<pre class="r"><code>run_mcmc_SSE(tree_file, range_file, model = &quot;geosse&quot;, outfile = mcmc.log, iterations = 10000, rho = sampling_fractions)</code></pre>
+<pre class="r"><code>mcmc.log = &quot;bombacoideae_geosse.log&quot;</code></pre>
+<p>Run the analysis (you can increase the number of iterations to run a longer analysis and improve convergence)</p>
+<pre class="r"><code>run_mcmc_SSE(tree, range.data, model = &quot;geosse&quot;, outfile = mcmc.log, iterations = 10000, rho = sampling_fractions)</code></pre>
 </div>
 <div id="process-and-plot-output" class="section level1">
 <h1>Process and plot output</h1>
@@ -511,19 +512,18 @@ boxplot(post[, c(&quot;xA&quot;, &quot;xB&quot;)], col = &quot;red&quot;, main =
 <p>Are dispersals rates significantly different?</p>
 <pre class="r"><code>delta_dispersal = post$dA - post$dB
 hist(delta_dispersal)</code></pre>
-<p>Calculate posterior probability of dAB &gt; dBA:</p>
+<p>Calculate the posterior probability of <code>dAB &gt; dBA</code>:</p>
 <pre class="r"><code>length(delta_dispersal[delta_dispersal &gt; 0])/length(delta_dispersal)</code></pre>
 <p>Are extinction rates significantly different?</p>
 <pre class="r"><code>delta_extinction = post$xA - post$xB
 hist(delta_extinction)</code></pre>
-<p>Calculate the posterior probability of xA &gt; xB:</p>
+<p>Calculate the posterior probability of <code>xA &gt; xB</code>:</p>
 <pre class="r"><code>length(delta_extinction[delta_extinction &gt; 0])/length(delta_extinction)</code></pre>
 </div>
 <div id="run-on-multiple-trees" class="section level1">
 <h1>Run on multiple trees</h1>
-<p>If provided with a tree file that includes multiple trees the MCMC can run sequentially on different trees to account for phylogenetic uncertainty. The <code>burnin</code> defines how many initial MCMC iterations should be discarded (i.e. not saved in the log file) for each tree.</p>
-<pre class="r"><code>tree_file = &quot;bromelioieae_100.trees&quot;
-run_mcmc_SSE(tree_file, trait_file, model = &quot;geosse&quot;, outfile = &quot;bromeliad_geosse100.log&quot;, iterations = 10000, nTREES = 5, burnin = 100)</code></pre>
+<p>If provided with a tree object that includes multiple trees (class “multiPhylo”) the MCMC can run sequentially on different trees to account for phylogenetic uncertainty. The <code>burnin</code> defines how many initial MCMC iterations should be discarded (i.e. not saved in the log file) for each tree and <code>nTREES</code> defines on how many trees the analysis is run.</p>
+<pre class="r"><code>run_mcmc_SSE(trees, range.data, model = &quot;geosse&quot;, outfile = &quot;geosse.log&quot;, iterations = 10000, nTREES = 5, burnin = 100)</code></pre>
 </div>
 
 

@@ -425,10 +425,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="fr_overview.html">Bioregions species richness</a>
+      <a href="bon_species_list.html">Obtaining a species list</a>
     </li>
     <li>
-      <a href="fr_overview.html">Richness maps by traits</a>
+      <a href="bon_species_richness_ecoregions.html">Species richness per ecoregion</a>
     </li>
     <li>
       <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
@@ -512,8 +512,8 @@ eoo_aoo &lt;- rCAT::ConBatch(taxa = records$species, lat = records$decimalLatitu
 <h2>2. ConR Automated conservation assessment</h2>
 <p>EOO and AOO alone are not sufficient for an assessment following IUCN Criterion B. You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. T His is based on the EOO we have encountered above and additionally the Area of Occupancy and the number of subpopulations.</p>
 <pre class="r"><code># Format input data for ConR
-inp &lt;- records %&gt;% filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% dplyr::select(ddlat = decimalLatitude, ddlon = decimalLongitude, 
-    tax = species)
+inp &lt;- records %&gt;% filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% dplyr::select(ddlat = decimalLatitude, 
+    ddlon = decimalLongitude, tax = species)
 
 # Preliminary assessment
 ev &lt;- IUCN.eval(inp)
@@ -528,8 +528,8 @@ iucn &lt;- read_csv(&quot;example_data/bombacoideae_iucn_redlist_assessments.csv
 out &lt;- ev %&gt;% left_join(iucn, by = c(taxa = &quot;scientific_name&quot;))
 
 # compare the important indices
-test &lt;- out %&gt;% select(taxa, automated_eoo = EOO, automated_AOO = AOO, automated_Category_CriteriaB = Category_CriteriaB, iucn_eoo = eoo_km2, iucn_aoo = aoo_km2, 
-    iucn_year = published_year, iucn_category = category, iucn_criteria = criteria)
+test &lt;- out %&gt;% select(taxa, automated_eoo = EOO, automated_AOO = AOO, automated_Category_CriteriaB = Category_CriteriaB, iucn_eoo = eoo_km2, 
+    iucn_aoo = aoo_km2, iucn_year = published_year, iucn_category = category, iucn_criteria = criteria)
 
 # plot for easy evaluation
 plo &lt;- test %&gt;% filter(!is.na(iucn_category)) %&gt;% mutate(iucn_eoo = parse_numeric(iucn_eoo))

@@ -425,10 +425,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="fr_overview.html">Bioregions species richness</a>
+      <a href="bon_species_list.html">Obtaining a species list</a>
     </li>
     <li>
-      <a href="fr_overview.html">Richness maps by traits</a>
+      <a href="bon_species_richness_ecoregions.html">Species richness per ecoregion</a>
     </li>
     <li>
       <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
@@ -545,9 +545,9 @@ bra.behr &lt;- spTransform(bra, CRS(behr)) %&gt;% fortify()
 # Supplementary figure weighted endemism
 plo &lt;- data.frame(rasterToPoints(we$WE_raster)) %&gt;% rename(we = ABROCOMIDAE_ABROCOMIDAE) %&gt;% filter(we &gt; 0)
 
-plo_we &lt;- ggplot() + geom_tile(data = plo, aes(x = x, y = y, fill = we)) + scale_fill_viridis(name = &quot;Weighted endemism&quot;, direction = -1, na.value = &quot;transparent&quot;) + 
-    geom_polygon(data = world.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, color = &quot;black&quot;) + xlim(-1.2e+07, -3e+06) + ylim(-6500000, 4500000) + 
-    coord_fixed() + # ggtitle(&#39;Corrected Weighted Endemism&#39;)+
+plo_we &lt;- ggplot() + geom_tile(data = plo, aes(x = x, y = y, fill = we)) + scale_fill_viridis(name = &quot;Weighted endemism&quot;, direction = -1, 
+    na.value = &quot;transparent&quot;) + geom_polygon(data = world.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, color = &quot;black&quot;) + 
+    xlim(-1.2e+07, -3e+06) + ylim(-6500000, 4500000) + coord_fixed() + # ggtitle(&#39;Corrected Weighted Endemism&#39;)+
 theme_map() + theme(legend.justification = c(0, 0), legend.position = c(0, 0))
 
 ggsave(filename = &quot;output/submission/Supplementary_figure_weighted_Endemism.jpg&quot;, plot = plo_we, height = 11, width = 8)
@@ -559,21 +559,24 @@ ri_gen &lt;- raster(&quot;output/submission/richness_raster_bromeliaceae_genera_
 plo_gen &lt;- data.frame(rasterToPoints(ri_gen)) %&gt;% filter(layer &gt; 0)
 
 plo_gen &lt;- ggplot() + # geom_polygon(data = world.behr, aes(x = long, y = lat, group = group), fill = &#39;transparent&#39;, color = &#39;black&#39;)+
-geom_tile(data = plo_gen, aes(x = x, y = y, fill = layer), alpha = 1) + geom_polygon(data = count.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, 
-    color = &quot;grey20&quot;) + geom_polygon(data = bra.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, color = &quot;grey20&quot;) + scale_fill_viridis(name = &quot;Genera&quot;, 
-    direction = -1, na.value = &quot;transparent&quot;) + xlim(-1.2e+07, -3e+06) + ylim(-6500000, 4500000) + coord_fixed() + # ggtitle(&#39;Bromeliaceae&#39;)+
+geom_tile(data = plo_gen, aes(x = x, y = y, fill = layer), alpha = 1) + geom_polygon(data = count.behr, aes(x = long, y = lat, group = group), 
+    fill = &quot;transparent&quot;, color = &quot;grey20&quot;) + geom_polygon(data = bra.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, 
+    color = &quot;grey20&quot;) + scale_fill_viridis(name = &quot;Genera&quot;, direction = -1, na.value = &quot;transparent&quot;) + xlim(-1.2e+07, -3e+06) + 
+    ylim(-6500000, 4500000) + coord_fixed() + # ggtitle(&#39;Bromeliaceae&#39;)+
 theme_map() + theme(legend.justification = c(0, 0), legend.position = c(0, 0))
 
 
-plo_wep &lt;- data.frame(rasterToPoints(we_test$P.above.raster)) %&gt;% rename(we_p = ABROCOMIDAE_ABROCOMIDAE) %&gt;% filter(we_p &gt; 0) %&gt;% mutate(we_pcat = ifelse(we_p &lt; 
-    0.025, &quot;High&quot;, we_p)) %&gt;% mutate(we_pcat = ifelse(we_p &gt; 0.975, &quot;Low&quot;, we_pcat)) %&gt;% mutate(we_pcat = ifelse(we_p &lt; 0.975 &amp; we_p &gt; 0.025, &quot;Not significant&quot;, 
-    we_pcat))
+plo_wep &lt;- data.frame(rasterToPoints(we_test$P.above.raster)) %&gt;% rename(we_p = ABROCOMIDAE_ABROCOMIDAE) %&gt;% filter(we_p &gt; 0) %&gt;% 
+    mutate(we_pcat = ifelse(we_p &lt; 0.025, &quot;High&quot;, we_p)) %&gt;% mutate(we_pcat = ifelse(we_p &gt; 0.975, &quot;Low&quot;, we_pcat)) %&gt;% mutate(we_pcat = ifelse(we_p &lt; 
+    0.975 &amp; we_p &gt; 0.025, &quot;Not significant&quot;, we_pcat))
 
 
 plo_wep &lt;- ggplot() + # geom_polygon(data = world.behr, aes(x = long, y = lat, group = group), fill = &#39;transparent&#39;, color = &#39;black&#39;)+
-geom_tile(data = plo_wep, aes(x = x, y = y, fill = we_pcat), alpha = 1) + geom_polygon(data = count.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, 
-    color = &quot;grey20&quot;) + geom_polygon(data = bra.behr, aes(x = long, y = lat, group = group), fill = &quot;transparent&quot;, color = &quot;grey20&quot;) + # scale_fill_viridis(name = &#39;Genera&#39;, direction = -1, na.value = &#39;transparent&#39;)+
-scale_fill_brewer(name = &quot;Weighted Endemism&quot;, palette = &quot;Set1&quot;) + xlim(-1.2e+07, -3e+06) + ylim(-6500000, 4500000) + coord_fixed() + # ggtitle(&#39;Bromeliaceae&#39;)+
+geom_tile(data = plo_wep, aes(x = x, y = y, fill = we_pcat), alpha = 1) + geom_polygon(data = count.behr, aes(x = long, y = lat, 
+    group = group), fill = &quot;transparent&quot;, color = &quot;grey20&quot;) + geom_polygon(data = bra.behr, aes(x = long, y = lat, group = group), 
+    fill = &quot;transparent&quot;, color = &quot;grey20&quot;) + # scale_fill_viridis(name = &#39;Genera&#39;, direction = -1, na.value = &#39;transparent&#39;)+
+scale_fill_brewer(name = &quot;Weighted Endemism&quot;, palette = &quot;Set1&quot;) + xlim(-1.2e+07, -3e+06) + ylim(-6500000, 4500000) + coord_fixed() + 
+    # ggtitle(&#39;Bromeliaceae&#39;)+
 theme_map() + theme(legend.justification = c(0, 0), legend.position = c(0, 0))
 
 

@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Alexander Zizka" />
 
 
-<title>ToDo.utf8</title>
+<title>Species richness per ecoregion</title>
 
 <script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -23,6 +24,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -450,12 +453,88 @@ $(document).ready(function () {
 
 
 
+<h1 class="title toc-ignore">Species richness per ecoregion</h1>
+<h4 class="author">Alexander Zizka</h4>
+<h4 class="date">2/2/2021</h4>
 
 </div>
 
 
-<p>Alex - Set up github repo for this year based on the repository from 2019 - Define the new time table - Send an email to all students, incuding: - invitation to slack - instructions to install Rstudio and R - instructions on which packages to install - Instructiont for the project design - Information on the first day - Information on how we will work during the course - Ask them to create an IUCN account - ask them to create a gbif account - set up a google doc to work on the schedule and the todo for daniele and me - gap analysis which lectures and tutorials need to be updated from last time? - update relevant lectures and tutorials -ask to eduardo</p>
-<p>Daniele</p>
+<p>Get the number of species in a specific ecoregion based on species occurrence data.</p>
+<div id="library-setup" class="section level1">
+<h1>Library setup</h1>
+<pre class="r"><code>library(tidyverse)
+library(sf)
+library(viridis)
+library(readxl)
+library(writexl)
+library(rnaturalearth)</code></pre>
+<pre class="r"><code># load occurrences
+dat &lt;- read_csv(file = &quot;example_data/day3_historical_biogeography/cleaned_occurrences_bombacoideae.csv&quot;)
+
+dat &lt;- dat %&gt;% mutate(tax_name = species)
+
+# load ecoregions
+poly &lt;- st_read(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;wwf_terr_ecos&quot;)
+world &lt;- ne_countries(scale = &quot;medium&quot;, returnclass = &quot;sf&quot;)
+
+# point in polygons with ecoregions, this may take some time
+pts &lt;- st_as_sf(dat, coords = c(&quot;decimalLongitude&quot;, &quot;decimalLatitude&quot;), crs = st_crs(world))
+
+pip &lt;- st_intersection(pts, poly)
+
+out &lt;- pip %&gt;% select(tax_name, ECO_NAME, REALM, BIOME)
+
+st_geometry(out) &lt;- NULL
+
+# modify ecoregion name to contain the realm
+out &lt;- out %&gt;% mutate(area = paste(ECO_NAME, &quot; (&quot;, REALM, &quot;)&quot;, sep = &quot;&quot;))
+
+# write the names of the taxa with occurrences
+sp_occ &lt;- out %&gt;% select(tax_name) %&gt;% distinct()
+
+# return the number of taxa which we ultimately include in the analyses
+length(unique(out$tax_name))  #74 taxa
+out %&gt;% filter(is.na(tax_name))
+out %&gt;% filter(is.na(area))
+
+# get the number of ecoregions per species
+count &lt;- out %&gt;% select(tax_name, area) %&gt;% distinct() %&gt;% group_by(tax_name) %&gt;% summarize(n_ecoregions = n()) %&gt;% arrange(desc(n_ecoregions))
+
+# A barchart per ecoregion,, here we only show the top 20 ecoregions!
+eco &lt;- out %&gt;% select(tax_name, area) %&gt;% distinct() %&gt;% group_by(area) %&gt;% summarize(taxa = n()) %&gt;% arrange(desc(taxa)) %&gt;% ungroup() %&gt;% 
+    top_n(n = 20)
+
+eco %&gt;% filter(is.na(area))
+# order
+ord &lt;- out %&gt;% select(tax_name, area) %&gt;% distinct() %&gt;% group_by(area) %&gt;% summarize(taxa = n()) %&gt;% arrange(taxa) %&gt;% left_join(eco %&gt;% 
+    select(area), by = &quot;area&quot;) %&gt;% select(area, taxa) %&gt;% distinct()
+
+ord %&gt;% filter(is.na(area))
+ord %&gt;% filter(is.na(taxa))
+
+plo &lt;- eco %&gt;% left_join(out %&gt;% select(area, REALM) %&gt;% distinct(), by = &quot;area&quot;) %&gt;% mutate(REALM = recode(REALM, AA = &quot;Australasia&quot;, 
+    NT = &quot;Neotropics&quot;, `NA` = &quot;Nearctic&quot;, AT = &quot;Afrotropics&quot;, IM = &quot;IndoMalay&quot;, PA = &quot;Paleartic&quot;, OC = &quot;Oceania&quot;)) %&gt;% mutate(area = factor(area, 
+    levels = ord$area))
+
+plo %&gt;% filter(is.na(area))
+
+# bar chart of taxa per ecoregion
+ggplot() + geom_bar(data = plo, aes(y = area, x = taxa, fill = REALM), stat = &quot;identity&quot;, color = &quot;black&quot;) + scale_fill_brewer(palette = &quot;Set2&quot;) + 
+    ylab(&quot;Ecoregion&quot;) + xlab(&quot;Number of taxa&quot;) + theme_bw() + theme(panel.grid.minor = element_blank(), legend.position = &quot;bottom&quot;, 
+    legend.title = element_blank()) + guides(fill = guide_legend(nrow = 1))
+
+ggsave(file = &quot;output/barchart_ecoregion_richness_realms.pdf&quot;)
+
+
+plo &lt;- plo %&gt;% left_join(out %&gt;% select(area, BIOME) %&gt;% distinct(), by = &quot;area&quot;) %&gt;% mutate(area = factor(area, levels = ord$area))
+
+ggplot() + geom_bar(data = plo, aes(y = area, x = taxa, fill = as.factor(BIOME)), stat = &quot;identity&quot;, color = &quot;black&quot;) + scale_fill_brewer(palette = &quot;Set2&quot;) + 
+    ylab(&quot;Ecoregion&quot;) + xlab(&quot;Number of taxa&quot;) + theme_bw() + theme(panel.grid.minor = element_blank(), legend.position = &quot;bottom&quot;, 
+    legend.title = element_blank())
+
+ggsave(file = &quot;output/barchart_ecoregion_richness_biomes.pdf&quot;)</code></pre>
+</div>
 
 
 

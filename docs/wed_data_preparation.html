@@ -425,10 +425,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="fr_overview.html">Bioregions species richness</a>
+      <a href="bon_species_list.html">Obtaining a species list</a>
     </li>
     <li>
-      <a href="fr_overview.html">Richness maps by traits</a>
+      <a href="bon_species_richness_ecoregions.html">Species richness per ecoregion</a>
     </li>
     <li>
       <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
@@ -484,11 +484,11 @@ library(rgdal)</code></pre>
 <h2>1. Extract clades from a large-scale phylogeny</h2>
 <p>In the last years large scale phylogenies for certain taxonomic groups have become available, for instance for amphibians, birds, mammals, squamates, and flowering plants. These phylogenies have challenges, but can provide helpful information for many research questions.</p>
 <pre class="r"><code># Load the species list
-splist &lt;- read_csv(&quot;example_data/bombacoideae_specieslist.csv&quot;)
+splist &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_specieslist.csv&quot;)
 rownames(splist) &lt;- splist$species
 
 # Load the large-scale phylogeny
-tree &lt;- read.tree(&quot;example_data/VascularPlants.tre&quot;)
+tree &lt;- read.tree(&quot;example_data/day3_historical_biogeography/VascularPlants.tre&quot;)
 
 # Check if the spelling of the names is identical, e.g. if the epitheton is preceeded by a space or an underscore
 head(splist$species)
@@ -498,13 +498,13 @@ head(tree$tip.label)
 clade &lt;- treedata(tree, splist)$phy
 
 # save in newick format for DEC
-write.tree(clade, &quot;example_data/bombacoideae_phylogeny.newick&quot;)
+write.tree(clade, &quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick&quot;)
 
 # As .tre file for GeoSSE
-write.tree(clade, &quot;example_data/bombacoideae_phylogeny.tre&quot;)</code></pre>
+write.tree(clade, &quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.tre&quot;)</code></pre>
 <p>If you do not have a species list, or your list is incomplete for your group of interest (for example, because you extracted it from the GBIF data) you can also pick two species whose most recent common ancestor matches with the MRCA of your clade of interest. As an example, we will extract all Canidae from the mammal phylogeny. First we will need to find the MRCA of the group. To do so, you need to identify two genera, whose MRCA coincides with the MRCA of all Canidae, for instance <em>Vulpes</em> (foxes) and <em>Lupus</em> (wolves). You can use <a href="http://www.onezoom.org/life/" class="uri">http://www.onezoom.org/life/</a> to identify suitable genera to extract your clade of interest. Alternatively you can also provide a list of all species to keep in the tree.</p>
 <pre class="r"><code># read the large-scale phylogeny
-mammals_tree &lt;- read.tree(&quot;example_data/mammals.tre&quot;)
+mammals_tree &lt;- read.tree(&quot;example_data/day3_historical_biogeography/mammals.tre&quot;)
 # Check properties (attributes) of the tree object
 str(mammals_tree)
 
@@ -537,14 +537,14 @@ write.tree(canidae_tree, &quot;inst/canidae_phylogeny.newick&quot;)</code></pre>
 <div id="taxon-specific-bioregions" class="section level3">
 <h3>Taxon-specific bioregions</h3>
 <pre class="r"><code># Load cleaned occurences
-occ &lt;- read_csv(&quot;example_data/bombacoideae_occurrences_cleaned.csv&quot;) %&gt;% as.data.frame()
+occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv&quot;) %&gt;% as.data.frame()
 
 # remove species not in the phylogeny
-tr &lt;- read.tree(&quot;example_data/bombacoideae_phylogeny.newick&quot;)
+tr &lt;- read.tree(&quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick&quot;)
 occ &lt;- occ %&gt;% filter(species %in% tr$tip.label)
 
 # load bioregions
-area &lt;- readOGR(dsn = &quot;example_data&quot;, layer = &quot;bombacoideae_infomap_shapefile&quot;)
+area &lt;- readOGR(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;bombacoideae_infomap_shapefile&quot;)
 
 # Classify species
 class &lt;- SpGeoCod(x = occ, y = area, areanames = &quot;bioregn&quot;)
@@ -559,10 +559,10 @@ class[class &gt; 0] &lt;- 1
 class$comb &lt;- apply(class, 1, function(x) paste(x, collapse = &quot;&quot;))
 
 class &lt;- dplyr::select(class, comb)
-# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and
-# then in brackets a one latter code for each area
+# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number
+# is the number of bioregions, and then in brackets a one latter code for each area
 
-sink(&quot;example_data/bombacoideae_area_classification.txt&quot;)
+sink(&quot;bombacoideae_area_classification.txt&quot;)
 cat(&quot;38 8 (A B C D E F G H )\n&quot;)
 write.table(as.data.frame(class), row.names = TRUE, col.names = FALSE, quote = FALSE)
 sink(NULL)</code></pre>
@@ -571,14 +571,14 @@ sink(NULL)</code></pre>
 <h3>Biomes</h3>
 <p>The vast majority of species occurrence information available, via ‘big data’ aggregators as GBIF are georeferenced point locations consisting of geographic coordinates. However, most methods for ancestral area estimation require species occurrences in a limited number of discrete geographic units. A manual classification of species based on expert knowledge or graphical-user-interface based GIS software are limited in the amount of data that can be processed and often hard to reproduce. SpeciesgeocodeR implements an easy-to-use function to classify species occurrence to discrete areas, accounting for issues in data quality. You can find detailed tutorials on the software <a href="https://github.com/azizka/speciesgeocodeR/wiki">here</a> and articles disrobing the method <a href="https://academic.oup.com/sysbio/article/66/2/145/2670075/SpeciesGeoCoder-Fast-Categorization-of-Species">here</a> and <a href="http://www.biorxiv.org/content/early/2015/11/24/032755">here</a>.</p>
 <pre class="r"><code># Load cleaned occurences
-occ &lt;- read_csv(&quot;example_data/bombacoideae_occurrences_cleaned.csv&quot;)
+occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv&quot;)
 
 # remove species not in the phylogeny
-tr &lt;- read.tree(&quot;example_data/bombacoideae_phylogeny.newick&quot;)
+tr &lt;- read.tree(&quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick&quot;)
 occ &lt;- occ %&gt;% filter(species %in% tr$tip.label) %&gt;% as.data.frame()
 
 # Load biomes
-biom &lt;- WWFload(x = &quot;inst&quot;)
+biom &lt;- readOGR(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;wwf_terr_ecos&quot;)
 names(biom)
 
 # Classify species
@@ -591,13 +591,13 @@ dplyr::select(-not_classified, -`3`, -`4`, -`5`, -`9`, -`10`, -`98`) %&gt;% as.d
 # adapt to the BioGeoBEARS format
 class[class &gt; 0] &lt;- 1
 
-write.csv(class, &quot;example_data/bombacoideae_biome_classification_details.csv&quot;)
+write.csv(class, &quot;bombacoideae_biome_classification_details.csv&quot;)
 
 class$comb &lt;- apply(class, 1, function(x) paste(x, collapse = &quot;&quot;))
 
 class &lt;- dplyr::select(class, comb)
-# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and
-# then in brackets a one latter code for each area
+# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number
+# is the number of bioregions, and then in brackets a one latter code for each area
 
 sink(&quot;example_data/bombacoideae_biome_classification.txt&quot;)
 cat(&quot;38 5 (A B C D E)\n&quot;)

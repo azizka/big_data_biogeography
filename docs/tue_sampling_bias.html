@@ -425,10 +425,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="fr_overview.html">Bioregions species richness</a>
+      <a href="bon_species_list.html">Obtaining a species list</a>
     </li>
     <li>
-      <a href="fr_overview.html">Richness maps by traits</a>
+      <a href="bon_species_richness_ecoregions.html">Species richness per ecoregion</a>
     </li>
     <li>
       <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
@@ -493,7 +493,8 @@ library(sampbias)</code></pre>
 <h1>Tutorial</h1>
 <div id="load-the-example-distribution-data-from-your-data" class="section level2">
 <h2>1. Load the example distribution data from your data</h2>
-<pre class="r"><code>occ &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_malvaceae.csv&quot;) %&gt;% mutate(decimallongitude = decimalLongitude) %&gt;% mutate(decimallatitude = decimalLatitude)</code></pre>
+<pre class="r"><code>occ &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_malvaceae.csv&quot;) %&gt;% mutate(decimallongitude = decimalLongitude) %&gt;% 
+    mutate(decimallatitude = decimalLatitude)</code></pre>
 </div>
 <div id="run-sampbias-with-the-default-settings.-samplingbias" class="section level2">
 <h2>2. Run sampbias with the default settings. (SamplingBias)</h2>
@@ -504,7 +505,7 @@ bias.out &lt;- calculate_bias(x = occ, res = 1)
 # Summarize and visualize the results
 summary(bias.out)
 plot(bias.out)</code></pre>
-<p>In addition to the input from above, <code>calculate_bias</code> offers options to customize analyses, of which the most important ones are shown in Table 1. See <code>?calculate_bias</code> for a detailed description of all options, and the section “Changing default settings” of this tutorial for a description and examples for the “restricted sample” and “inp_raster” options. <strong>It is of special importance to adapt the raster resolution to the extent of the study area via the <code>res</code> or <code>inp_raster</code> options.</strong></p>
+<p>In addition to the input from above, <code>calculate_bias</code> offers options to customize analyses, of which the most important ones are shown in Table 1. See <code>?calculate_bias</code> for a detailed description of all options, and the section “Changing default settings” of the <a href="https://github.com/azizka/sampbias/blob/master/vignettes/Using_the_samp_bias_rpackage.pdf">sampbias tutorial</a> for a description and examples for the “restricted sample” and “inp_raster” options. <strong>It is of special importance to adapt the raster resolution to the extent of the study area via the <code>res</code> or <code>inp_raster</code> options.</strong></p>
 <p>As the last step, it is possible to project the bias effects into space and map them to identify areas with particular high bias, for instance, to design future field campaigns (Fig. 2).</p>
 <pre class="r"><code>proj &lt;- project_bias(bias.out)
 map_bias(proj)</code></pre>

@@ -425,10 +425,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="fr_overview.html">Bioregions species richness</a>
+      <a href="bon_species_list.html">Obtaining a species list</a>
     </li>
     <li>
-      <a href="fr_overview.html">Richness maps by traits</a>
+      <a href="bon_species_richness_ecoregions.html">Species richness per ecoregion</a>
     </li>
     <li>
       <a href="bon_extracting_environmental_data.html">Extracting environmental data</a>
@@ -488,14 +488,15 @@ library(dplyr)
 `?`(pbdb_occurrences)
 
 # get the data from the Paleobiology DB, use the arguments to narrow your search
-dat_tax &lt;- paleobioDB::pbdb_occurrences(base_name = c(&quot;Malvaceae&quot;, &quot;Bombacaceae&quot;), vocab = &quot;pbdb&quot;, limit = 500, show = c(&quot;coords&quot;, &quot;phylo&quot;, &quot;attr&quot;, &quot;loc&quot;, &quot;time&quot;, 
-    &quot;rem&quot;, &quot;ident&quot;))
+dat_tax &lt;- paleobioDB::pbdb_occurrences(base_name = c(&quot;Malvaceae&quot;, &quot;Bombacaceae&quot;), vocab = &quot;pbdb&quot;, limit = 500, show = c(&quot;coords&quot;, 
+    &quot;phylo&quot;, &quot;attr&quot;, &quot;loc&quot;, &quot;time&quot;, &quot;rem&quot;, &quot;ident&quot;))
 rownames(dat) &lt;- NULL
 
 # It is also possible to download records from a list of species or genera which may yield more results
 gen_list &lt;- read_csv(&quot;example_data/day1_biodiversity_databases/bombacoideae_genuslist.csv&quot;)
 
-dat_gen &lt;- paleobioDB::pbdb_occurrences(base_name = gen_list$gen, vocab = &quot;pbdb&quot;, limit = 500, show = c(&quot;coords&quot;, &quot;phylo&quot;, &quot;attr&quot;, &quot;loc&quot;, &quot;time&quot;, &quot;rem&quot;, &quot;ident&quot;))
+dat_gen &lt;- paleobioDB::pbdb_occurrences(base_name = gen_list$gen, vocab = &quot;pbdb&quot;, limit = 500, show = c(&quot;coords&quot;, &quot;phylo&quot;, &quot;attr&quot;, 
+    &quot;loc&quot;, &quot;time&quot;, &quot;rem&quot;, &quot;ident&quot;))
 
 # combine the two datasets
 dat &lt;- bind_rows(dat_tax, dat_gen)
