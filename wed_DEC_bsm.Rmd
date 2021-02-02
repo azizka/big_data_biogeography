@@ -9,7 +9,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
                       results = 'hold')
 ```
 
-In this exercise, you will use the results of the ancestral state recosntruction, to do a biogeographic stochastic mapping, and count the number of shifts throught time.
+In this exercise, you will use the results of the ancestral state recosntruction, to do a biogeographic stochastic mapping, and count the number of dispersals throught time.
 
 # Library setup
 ```{r}
@@ -87,95 +87,83 @@ save(clado_events_tables, file = "example_data/bombacoideae_BSM_clado_events_tab
 save(ana_events_tables, file ="example_data/bombacoideae_BSMana_events_table_mcc_detbiom.rda")
 ```
 
-## Get the number of shifts through time
-You may want to adapt the maximum age here!
+## Calculate the number of dispersal through time
+The following functions calaculates the number of estimated dispersals through time relative to the total branch length across time bins. 
+The function requires the `BSM_output` and `res` objects created in the previous steps. 
+Additionally you can adjust the max age (based on the root age of your tree) and the bin size. 
 ```{r}
-angen <- lapply(ana_events_tables, function(k){
-  out <- k %>% 
-  dplyr::select(abs_event_time, event_type, event_txt, dispersal_to) %>% 
-  mutate(bin = cut(abs_event_time, 
-                   breaks = seq(24, 0, by = -2), 
-                   labels = rev(seq(23, 1, by = -2))))%>% 
-    mutate(from = str_split_fixed(event_txt, n = 2, pattern = "->")[,1 ]) %>% 
-    mutate(sdb_efb = ifelse(!grepl("W", from) & grepl("W", dispersal_to), 1, 0)) %>% 
-    mutate(efb_sdb = ifelse(from == "W" & (grepl("D", dispersal_to) | grepl("S", dispersal_to)), 1, 0))
-  return(out)
-  })
+count_dispersal_events <- function(BSM_output, res,
+                                  max_age = 25,
+                                  bin_size = 1,
+                                  FUN = mean){
+      resolution <- bin_size
+      tr <- read.tree(res$inputs$trfn)
+      
+      clado_events_tables = BSM_output$RES_clado_events_tables
+      ana_events_tables = BSM_output$RES_ana_events_tables
+      
+      area_labels  = sort(unique(ana_events_tables[[length(ana_events_tables)]]$dispersal_to))
 
-# cladogenetic events do not include dispersal to new biomes
-cladgen <- lapply(clado_events_tables, function(k){
-  out <-  k %>% 
-  dplyr::select(time_bp, clado_event_type, clado_event_txt, clado_dispersal_to) %>% 
-  filter(!is.na(clado_event_type) & clado_event_type != "")
-  return(out)
-})
-```
+      # Get the number of shifts through time
+      breaks <- seq(max_age, 0, by = -resolution)
+      labels <- rev((breaks+resolution/2)[-1])
 
-# Count the number of shifts per time bin
-Again you may need to adapt the maximum age and the number of areas.
-```{r}
-disps <- lapply(angen, function(k){
-  out <-  k %>% 
-    filter(event_type == "d") %>%
-    group_by(bin, dispersal_to) %>% 
-    summarize(abs_count = n()) %>% 
-    ungroup() %>% 
-    mutate(bin = parse_number(as.character(bin)))
-  
-  fram <- expand_grid( bin = rev(seq(23, 1, by = -2)), 
-                       dispersal_to = c("A", "B", "C", "D", "E"))
-  out <- left_join(fram, out, by = c("dispersal_to", "bin")) %>% 
-    replace_na(list(abs_count = 0))
-})
+      angen <- lapply(ana_events_tables, function(k) {
+          out <- k %>% dplyr::select(abs_event_time, event_type, event_txt, dispersal_to) %>% mutate(bin = cut(abs_event_time, breaks = breaks, labels = labels)) %>% mutate(from = str_split_fixed(event_txt, n = 2, pattern = "->")[, 1]) %>% mutate(sdb_efb = ifelse(!grepl("W", from) & grepl("W", dispersal_to), 
+              1, 0)) %>% mutate(efb_sdb = ifelse(from == "W" & (grepl("D", dispersal_to) | grepl("S", dispersal_to)), 1, 0))
+          return(out)
+      })
 
-disps <- bind_rows(disps,.id = "SM") %>% 
-  group_by(bin, dispersal_to) %>% 
-  summarize(lower = quantile(abs_count, probs = 0.025),
-            mean = mean(abs_count),
-            upper = quantile(abs_count, probs = 0.975))
-```
 
-# Get the total branch length per time bin
-```{r}
-agegap = 2
-branchtimes <-  branching.times(tr)
-maxmilcatogories <-  ceiling(max(branchtimes) / agegap)
-milgaps_mod <- matrix(ncol = 2, nrow = maxmilcatogories, 0)
-colnames(milgaps_mod) <- c("time","tot_brl")
-milgaps_mod[,1] <- 1:maxmilcatogories*agegap
+      # count events
+      disps <- lapply(angen, function(k) {
+          out <- k %>% filter(event_type == "d") %>% group_by(bin, dispersal_to) %>% summarize(abs_count = n()) %>% ungroup() %>% mutate(bin = parse_number(as.character(bin)))
+    
+          fram <- expand_grid(bin = labels, dispersal_to = area_labels)
+          out <- left_join(fram, out, by = c("dispersal_to", "bin")) %>% replace_na(list(abs_count = 0))
+      })
 
-## Sum times per bin
-v <- branchtimes
-for(i in 1:length(milgaps_mod[, 2])){
-  s <- milgaps_mod[i, 1]        # time start
-  e <- milgaps_mod[i, 1] - agegap # time end
-  l1 <- length(v[v > s]) * agegap + min(length(v[v > s]), 1) * agegap
-  l2 <- sum(v[v > e & v<s] -e)
-  
-  if (l1 == 0){
-    l2 = l2*2
-  } # root
-  
-  milgaps_mod[i,2] <- l1 + l2
+      disps <- bind_rows(disps, .id = "SM") %>% group_by(bin, dispersal_to) %>% summarize(lower = quantile(abs_count, probs = 0.025), avg = FUN(abs_count), upper = quantile(abs_count, 
+          probs = 0.975))
+      
+      
+      disps <- disps[which(disps[,5] > 0),]
+      
+      # get total branch length
+      milgaps_mod <- matrix(ncol = 2, nrow = length(labels), 0)
+      colnames(milgaps_mod) <- c("time", "tot_brl")
+      milgaps_mod[, 1] <- labels
+      rev_breaks = rev(breaks)
+      ## Sum times per bin
+      v <- branching.times(tr)
+      for (i in 2:length(rev_breaks)) {
+              s <- rev_breaks[i]  # time start
+              e <- rev_breaks[i-1]  # time end
+              l1 <- length(v[v > s]) * resolution + min(length(v[v > s]), 1) * resolution
+              l2 <- sum(v[v > e & v < s] - e)
+              if (l1 == 0) 
+                  {
+                      l2 = l2 * 2
+                  }  # root
+              milgaps_mod[i-1, 2] <- l1 + l2
+      }
+      brls <- data.frame(milgaps_mod)
+      # 
+      rescaled_disps <- left_join(disps, brls, by = c(bin = "time")) %>% mutate(lower = lower/tot_brl) %>% mutate(avg = avg/tot_brl) %>% mutate(upper = upper/tot_brl)
+      rescaled_disps[,1] <- -rescaled_disps[,1]
+      return(rescaled_disps)
+    
 }
-
-brls <- data.frame(milgaps_mod) %>% 
-  mutate(time = time - 1)
 ```
 
-# Normalize the number of shifts by the total amount of branch length per time bin
+After loading the function you can call it to get a table of relative dispersal counts and plot them through time
 ```{r}
-disps <- left_join(disps, brls, by = c("bin" = "time")) %>% 
-  mutate(lower = lower / tot_brl) %>% 
-  mutate(mean = mean / tot_brl) %>% 
-  mutate(upper = upper / tot_brl)
-```
+relative_dispersals <- count_dispersal_events(BSM_output, res, max_age = 25, bin_size = 1)
 
-```{r}
-ggplot()+
-  geom_point(data = disps, aes(x = bin, y = mean, color = dispersal_to))+
-  geom_line(data = disps, aes(x = bin, y = mean, color = dispersal_to))+
-  theme_bw()
+# plot results
+p <- ggplot() + geom_point(data = relative_dispersals, aes(x = bin, y = avg, color = dispersal_to)) + 
+                geom_line(data = relative_dispersals, aes(x = bin, y = avg, color = dispersal_to)) + theme_bw()
+p + labs(x = "Time (Ma)", y = "Relative number of dispersals")
 ```
 
 
