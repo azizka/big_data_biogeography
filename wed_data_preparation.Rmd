@@ -37,11 +37,11 @@ In the last years large scale phylogenies for certain taxonomic groups have beco
 
 ```{r}
 # Load the species list
-splist <- read_csv("example_data/bombacoideae_specieslist.csv")
+splist <- read_csv("example_data/day3_historical_biogeography/bombacoideae_specieslist.csv")
 rownames(splist) <- splist$species
 
 # Load the large-scale phylogeny
-tree <- read.tree("example_data/VascularPlants.tre")
+tree <- read.tree("example_data/day3_historical_biogeography/VascularPlants.tre")
 
 # Check if the spelling of the names is identical, e.g. if the epitheton is preceeded by a space or an underscore
 head(splist$species)
@@ -51,17 +51,17 @@ head(tree$tip.label)
 clade <- treedata(tree, splist)$phy
 
 # save in newick format for DEC
-write.tree(clade, "example_data/bombacoideae_phylogeny.newick")
+write.tree(clade, "example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick")
 
 # As .tre file for GeoSSE
-write.tree(clade, "example_data/bombacoideae_phylogeny.tre")
+write.tree(clade, "example_data/day3_historical_biogeography/bombacoideae_phylogeny.tre")
 ```
 
 If you do not have a species list, or your list is incomplete for your group of interest (for example, because you extracted it from the GBIF data) you can also pick two species whose most recent common ancestor matches with the MRCA of your clade of interest. As an example, we will extract all Canidae from the mammal phylogeny. First we will need to find the MRCA of the group. To do so, you need to identify two genera, whose MRCA coincides with the MRCA of all Canidae, for instance *Vulpes* (foxes) and *Lupus* (wolves). You can use http://www.onezoom.org/life/ to identify suitable genera to extract your clade of interest. Alternatively you can also provide a list of all species to keep in the tree.
 
 ```{r}
 # read the large-scale phylogeny
-mammals_tree <- read.tree("example_data/mammals.tre")
+mammals_tree <- read.tree("example_data/day3_historical_biogeography/mammals.tre")
 # Check properties (attributes) of the tree object
 str(mammals_tree)
 
@@ -97,16 +97,16 @@ write.tree(canidae_tree, "inst/canidae_phylogeny.newick")
 
 ```{r}
 # Load cleaned occurences
-occ <- read_csv("example_data/bombacoideae_occurrences_cleaned.csv") %>% 
+occ <- read_csv("example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv") %>% 
   as.data.frame()
 
 # remove species not in the phylogeny
-tr <- read.tree("example_data/bombacoideae_phylogeny.newick")
+tr <- read.tree("example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick")
 occ <- occ %>% 
   filter(species %in% tr$tip.label)
 
 # load bioregions
-area <- readOGR(dsn = "example_data", layer = "bombacoideae_infomap_shapefile")
+area <- readOGR(dsn = "example_data/day3_historical_biogeography", layer = "bombacoideae_infomap_shapefile")
 
 # Classify species
 class <- SpGeoCod(x = occ, y = area, areanames = "bioregn")
@@ -126,7 +126,7 @@ class <- dplyr::select(class, comb)
 # write to disk
 # Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and then in brackets a one latter code for each area
 
-sink("example_data/bombacoideae_area_classification.txt")
+sink("bombacoideae_area_classification.txt")
 cat("38 8 (A B C D E F G H )\n")
 write.table(as.data.frame(class), row.names = TRUE, col.names = FALSE, quote = FALSE)
 sink(NULL)
@@ -137,16 +137,16 @@ The vast majority of species occurrence information available, via 'big data' ag
 
 ```{r}
 # Load cleaned occurences
-occ <- read_csv("example_data/bombacoideae_occurrences_cleaned.csv")
+occ <- read_csv("example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv")
 
 # remove species not in the phylogeny
-tr <- read.tree("example_data/bombacoideae_phylogeny.newick")
+tr <- read.tree("example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick")
 occ <- occ %>% 
   filter(species %in% tr$tip.label) %>% 
   as.data.frame()
 
 # Load biomes
-biom <- WWFload(x = "inst")
+biom <-readOGR(dsn = "example_data/day3_historical_biogeography", layer = "wwf_terr_ecos")
 names(biom)
 
 # Classify species
@@ -161,7 +161,7 @@ class <- class$spec_table  %>%
 # adapt to the BioGeoBEARS format
 class[class > 0] <- 1
 
-write.csv(class, "example_data/bombacoideae_biome_classification_details.csv")
+write.csv(class, "bombacoideae_biome_classification_details.csv")
 
 class$comb <- apply(class, 1, function(x) paste(x, collapse = ""))
 

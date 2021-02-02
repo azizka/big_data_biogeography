@@ -63,7 +63,7 @@ summary(bias.out)
 plot(bias.out)
 ```
 
-In addition to the input from above, `calculate_bias` offers options to customize analyses, of which the most important ones are shown in Table 1. See `?calculate_bias` for a detailed description of all options, and the section "Changing default settings" of this tutorial for a description and examples for the "restricted sample" and "inp_raster" options. **It is of special importance to adapt the raster resolution to the extent of the study area via the `res` or `inp_raster` options.** 
+In addition to the input from above, `calculate_bias` offers options to customize analyses, of which the most important ones are shown in Table 1. See `?calculate_bias` for a detailed description of all options, and the section "Changing default settings" of the [sampbias tutorial](https://github.com/azizka/sampbias/blob/master/vignettes/Using_the_samp_bias_rpackage.pdf) for a description and examples for the "restricted sample" and "inp_raster" options. **It is of special importance to adapt the raster resolution to the extent of the study area via the `res` or `inp_raster` options.** 
 
 As the last step, it is possible to project the bias effects into space and map them to identify areas with particular high bias, for instance, to design future field campaigns (Fig. 2).
 

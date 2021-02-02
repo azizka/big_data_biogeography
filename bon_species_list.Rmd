@@ -1,0 +1,43 @@
+---
+title: "A species list from a higher rank taxon name"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
+                      echo=TRUE, warning=FALSE, message=FALSE,
+                      tidy = TRUE, collapse = TRUE,
+                      results = 'hold')
+```
+
+The taxize package enables you to get a list of daughter taxa from a higher taxonomic name. You will have to decide for a taxonomic to rely on. In this example we will use th GBIF backbone since we are working with GBIF data, but others may be more suitable for other applications. Options include ITIS, NCBI, WORMS, BOLD.
+
+# Setup
+```{r}
+library(rgbif)
+library(taxize)
+library(tidyverse)
+```
+
+# Obtain species list
+```{r}
+# get the GBIF ID first, as done in the exercise from day 1
+ID<- taxize::get_gbifid_("Ixodidae", method="backbone")%>% 
+  bind_rows() %>% # get_gbifid_ returns a list, convert to data.frame
+  filter(matchtype == "EXACT" & status == "ACCEPTED") # filter data
+
+# get all species with in this taxon
+# the donstream function will find species for you
+splist <- downstream(sci_id = ID$usagekey,
+                     db = "gbif",
+                     downto = "species",
+                     intermediate = FALSE,
+                     rows = NA)[[1]]
+
+# You may want to remove certain species from the list again
+splist <- splist %>% 
+  filter(!name %in% c("Amblyomma albopictum", "Dermacentor abaensis")) #the names of the species to remove here
+
+# write to disk
+write_csv(splist, "species_list.csv")
+```

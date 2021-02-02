@@ -1,0 +1,137 @@
+---
+title: "Species richness per ecoregion"
+author: "Alexander Zizka"
+date: "2/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Get the number of species in a specific ecoregion based on species occurrence data. 
+ 
+ 
+# Library setup
+```{r}
+library(tidyverse)
+library(sf)
+library(viridis)
+library(readxl)
+library(writexl)
+library(rnaturalearth)
+```
+ 
+```{r}
+#load occurrences
+dat <- read_csv(file = "example_data/day3_historical_biogeography/cleaned_occurrences_bombacoideae.csv")
+
+dat <- dat %>%
+  mutate(tax_name = species)
+
+# load ecoregions
+poly <- st_read(dsn = "example_data/day3_historical_biogeography", layer = "wwf_terr_ecos")
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# point in polygons with ecoregions, this may take some time
+pts <- st_as_sf(dat, coords = c("decimalLongitude", "decimalLatitude"), crs = st_crs(world))
+
+pip <- st_intersection(pts, poly)
+
+out <- pip %>%
+  select(tax_name, ECO_NAME, REALM, BIOME)
+
+st_geometry(out) <- NULL
+
+# modify ecoregion name to contain the realm
+out <- out %>%
+  mutate(area = paste(ECO_NAME, " (", REALM, ")", sep = ""))
+
+# write the names of the taxa with occurrences
+sp_occ <- out %>%
+  select(tax_name) %>%
+  distinct() 
+
+# return the number of taxa which we ultimately include in the analyses
+length(unique(out$tax_name)) #74 taxa
+out %>% filter(is.na(tax_name))
+out %>% filter(is.na(area))
+
+# get the number of ecoregions per species
+count <- out %>%
+  select(tax_name, area) %>%
+  distinct() %>%
+  group_by(tax_name) %>%
+  summarize(n_ecoregions = n()) %>%
+  arrange(desc(n_ecoregions))
+
+#A barchart per ecoregion,, here we only show the top 20 ecoregions!
+eco <- out %>%
+  select(tax_name, area) %>%
+  distinct()%>%
+  group_by(area) %>%
+  summarize(taxa = n()) %>%
+  arrange(desc(taxa)) %>%
+  ungroup() %>%
+  top_n(n =20)
+
+eco %>% filter(is.na(area))
+#order
+ord <- out %>%
+  select(tax_name, area) %>%
+  distinct()%>%
+  group_by(area) %>%
+  summarize(taxa = n()) %>%
+  arrange(taxa) %>%
+  left_join(eco %>%  select(area), by = "area") %>%
+  select(area, taxa) %>%
+  distinct()
+
+ord%>% filter(is.na(area))
+ord %>% filter(is.na(taxa))
+
+plo <- eco %>%
+  left_join(out %>% select(area, REALM) %>%  distinct() , by = "area") %>%
+  mutate(REALM = recode(REALM,
+                        AA = "Australasia",
+                        NT = "Neotropics",
+                        `NA` = "Nearctic",
+                        AT = "Afrotropics",
+                        IM = "IndoMalay",
+                        PA = "Paleartic",
+                        OC = "Oceania")) %>%
+  mutate(area = factor(area, levels = ord$area))
+
+plo%>% filter(is.na(area))
+
+# bar chart of taxa per ecoregion
+ggplot()+
+  geom_bar(data = plo, aes(y =area, x = taxa, fill = REALM), stat = "identity", color = "black")+
+  scale_fill_brewer(palette = "Set2")+
+  ylab("Ecoregion")+
+  xlab("Number of taxa")+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank())+
+  guides(fill = guide_legend(nrow = 1))
+
+ggsave(file = "output/barchart_ecoregion_richness_realms.pdf")
+
+
+plo <- plo %>%
+  left_join(out %>% select(area, BIOME) %>%  distinct() , by = "area")%>%
+  mutate(area = factor(area, levels = ord$area)) 
+
+ggplot()+
+  geom_bar(data = plo, aes(y =area, x = taxa, fill =as.factor(BIOME)), stat = "identity", color = "black")+
+  scale_fill_brewer(palette = "Set2")+
+  ylab("Ecoregion")+
+  xlab("Number of taxa")+
+  theme_bw()+
+  theme(panel.grid.minor = element_blank(),
+        legend.position = "bottom",
+        legend.title = element_blank())
+
+ggsave(file = "output/barchart_ecoregion_richness_biomes.pdf")
+ ```

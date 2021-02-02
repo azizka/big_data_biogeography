@@ -33,7 +33,7 @@ We will use the rgbif package to obtain occurrence records from GBIF. You can fi
 # Tutorial
 In the following tutorial, we will go through the questions one-by-one. The suggested answers are by no means the only correct ones.
 
-##Library setup
+## Library setup
 In this exercise we will use the rgbif library for communication with GBIF and the tidyverse library for data management.
 
 ```{r setup}
@@ -86,7 +86,7 @@ We can also obtain IDs for a list of species
 
 ```{r}
 #load species list
-splist <- read_csv("example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv")
+splist <- read_csv("C:/Users/az64mycy/Dropbox (iDiv)/teaching/2021_big_data_biogeography_physalis/example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv")
 
 gbif_taxon_keys <-
   splist %>%

@@ -57,12 +57,12 @@ library(CoordinateCleaner)
 GBIF provides a large amount of information for each record, leading to a huge data.frame with many columns. However some of this information is only available for few records, and thus for most analyses most of the columns can be dropped. Here, we will only retain information to identify the record and information that is important for cleaning up the data.
 
 ```{r}
-dat <- read_tsv("example_data/day2_data_quality_and_sampling_bias/raw_occurrences_malvaceae_sa.csv", guess_max = 25000, quote = "")
+dat <- read_tsv("C:/Users/az64mycy/Dropbox (iDiv)/teaching/2021_big_data_biogeography_physalis/example_data/day2_data_quality_and_sampling_bias/raw_occurrences_malvaceae_sa.csv", guess_max = 25000, quote = "")
 
 names(dat) #a lot of columns
 
 dat <- dat %>%
-  select(species, decimalLongitude, decimalLatitude, countryCode, individualCount,
+  dplyr::select(species, decimalLongitude, decimalLatitude, countryCode, individualCount,
          gbifID, family, taxonRank, coordinateUncertaintyInMeters, year,
          basisOfRecord,occurrenceStatus)%>% # you might find other ones useful depending on your downstream analyses
   mutate(countryCode = countrycode(dat$countryCode, origin =  'iso2c', destination = 'iso3c'))
@@ -71,14 +71,20 @@ dat <- dat %>%
 ## 2. Visualize the coordinates on a map
 Visualizing the data on a map can be extremely helpful to understand potential problems and to identify problematic records.
 
-```{r}
+```{r, tidy = FALSE}
 world.inp  <- map_data("world")
 
 ggplot()+
-  geom_map(data=world.inp, map=world.inp, aes(x=long, y=lat, map_id=region), fill = "grey80")+
-  xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, na.rm = T))+
-  ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T))+
-  geom_point(data = dat, aes(x = decimalLongitude, y = decimalLatitude),
+  geom_map(data=world.inp, 
+           map=world.inp, 
+           aes(x=long, y=lat, map_id=region), 
+           fill = "grey80")+
+  xlim(min(dat$decimalLongitude, na.rm = T), 
+       max(dat$decimalLongitude, na.rm = T))+
+  ylim(min(dat$decimalLatitude, na.rm = T), 
+       max(dat$decimalLatitude, na.rm = T))+
+  geom_point(data = dat, 
+             aes(x = decimalLongitude, y = decimalLatitude),
              size = 1)+
   coord_fixed()+
   theme_bw()+
@@ -131,7 +137,7 @@ dat_cl <- dat_cl%>%
   filter(year > 1945) # remove records from before second world war
 ```
 
-If available we can alsouse external information  in the cleaning process. For instance, in the case of the Bombacoideae, we can exclude all North American and European records, since the group is not occurring their natively.
+If available we can also use external information  in the cleaning process. For instance, in the case of the Bombacoideae, we can exclude all North American and European records, since the group is not occurring their natively.
 
 ```{r}
 dat_cl <- dat_cl %>% 
@@ -173,6 +179,28 @@ Here an additional `sum(flags$.summary)` records were flagged! A look at the tes
 plot(flags, lon = "decimalLongitude", lat = "decimalLatitude")
 ```
 
+### For marine species
+*Only for marine groups*
+
+The `clean_coordinates` function with the settings above will flag all records occurring in the sea as potentially problematic. If your taxa of interest includes marine species you may want to keep these occurrences. ONe option is to run clean_coordinates and remove the seas test. However, you may be interested in ONLY retaining records that occur in the sea and REMOVE all records from land (that is the reverse operation as for terrestrial species). Do to so you can reverse the results of the seas test as follows:
+
+```{r}
+flags %>% 
+  #reverse the results of the sea test
+  mutate(.sea = !.sea) 
+
+check <- flags %>% select(contains(".")) %>% 
+  mutate(.summary_marine = ifelse(all(), "gut", "schlecht"))
+
+%>% 
+  # since flags also contains a summary column for all test, we need to fix this as well. 
+  mutate(.summary = ifelse(all(. %>% select(contains("\."))), "gut", "schlecht") )
+
+
+
+```
+
+
 After this inspection we can safely remove the flagged records for this tutorial
 
 ```{r}
@@ -181,27 +209,39 @@ dat_cl <- dat_cl[flags$.summary, ]
 
 
 ## 6. Visualize the difference between the uncleaned and cleaned dataset (`plot`)
-```{r}
+```{r, tidy = FALSE}
 world.inp  <- map_data("world")
 
+# first plot showing the retain records in green and the removed records in red
 ggplot()+
-  geom_map(data=world.inp, map=world.inp, aes(x=long, y=lat, map_id=region), fill = "grey80")+
-  xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, na.rm = T))+
-  ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T))+
-  geom_point(data = dat, aes(x = decimalLongitude, y = decimalLatitude),
+  geom_map(data=world.inp, 
+           map=world.inp, 
+           aes(x=long, y=lat, map_id=region), fill = "grey80")+
+  xlim(min(dat$decimalLongitude, na.rm = T),
+       max(dat$decimalLongitude, na.rm = T))+
+  ylim(min(dat$decimalLatitude, na.rm = T), 
+       max(dat$decimalLatitude, na.rm = T))+
+  geom_point(data = dat, 
+             aes(x = decimalLongitude, y = decimalLatitude),
              colour = "darkred", size = 1)+
-  geom_point(data = dat_cl, aes(x = decimalLongitude, y = decimalLatitude),
+  geom_point(data = dat_cl, 
+             aes(x = decimalLongitude, y = decimalLatitude),
              colour = "darkgreen", size = 1)+
   coord_fixed()+
   theme_bw()+
   theme(axis.title = element_blank())
 
-
+# second plot showing only the retained species
 ggplot()+
-  geom_map(data=world.inp, map=world.inp, aes(x=long, y=lat, map_id=region), fill = "grey80")+
-  xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, na.rm = T))+
-  ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T))+
-  geom_point(data = dat_cl, aes(x = decimalLongitude, y = decimalLatitude),
+  geom_map(data=world.inp, map=world.inp,
+           aes(x=long, y=lat, map_id=region), 
+           fill = "grey80")+
+  xlim(min(dat$decimalLongitude, na.rm = T), 
+       max(dat$decimalLongitude, na.rm = T))+
+  ylim(min(dat$decimalLatitude, na.rm = T), 
+       max(dat$decimalLatitude, na.rm = T))+
+  geom_point(data = dat_cl, 
+             aes(x = decimalLongitude, y = decimalLatitude),
              size = 1)+
   coord_fixed()+
   theme_bw()+
