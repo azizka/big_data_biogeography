@@ -9,7 +9,7 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
                       results = 'hold')
 ```
 
-In this exercise you will run the DIspersal-Extinction-Cladogenesis model using the BioGeoBEARS R package.
+In this exercise you will run the Dispersal-Extinction-Cladogenesis model using the BioGeoBEARS R package.
 
 # Library setup
 
@@ -65,11 +65,11 @@ numstates_from_numareas(numareas=5, maxareas=5, include_null_range=TRUE)
 BioGeoBEARS_run_object$trfn = trfn
 BioGeoBEARS_run_object$geogfn = geogfn
 BioGeoBEARS_run_object$max_range_size = max_range_size
-BioGeoBEARS_run_object$min_branchlength = 0.000001    
+BioGeoBEARS_run_object$min_branchlength = 0.000001 # fix issues with zero-branch lengths   
 BioGeoBEARS_run_object$include_null_range = TRUE  
-BioGeoBEARS_run_object$speedup = TRUE          #
+BioGeoBEARS_run_object$speedup = TRUE         
 BioGeoBEARS_run_object$use_optimx = 'GenSA'     # if FALSE, use optim() instead of optimx()
-BioGeoBEARS_run_object$num_cores_to_use = 4
+BioGeoBEARS_run_object$num_cores_to_use = 4 # if parallel computing is not available this will default to 1
 BioGeoBEARS_run_object$force_sparse = FALSE    
 BioGeoBEARS_run_object = readfiles_BioGeoBEARS_run(BioGeoBEARS_run_object)
 BioGeoBEARS_run_object$return_condlikes_table = TRUE
