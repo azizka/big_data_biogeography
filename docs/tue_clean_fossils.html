@@ -495,9 +495,12 @@ library(readr)</code></pre>
 <div id="visualize-the-records-on-a-map" class="section level2">
 <h2>Visualize the records on a map</h2>
 <p>As a first step we will visualize the records on a map, to get a general overview.</p>
-<pre class="r"><code># plot data to get an overview
-wm &lt;- borders(&quot;world&quot;, colour = &quot;gray50&quot;, fill = &quot;gray50&quot;)
-ggplot() + coord_fixed() + wm + geom_point(data = dat, aes(x = lng, y = lat), colour = &quot;darkred&quot;, size = 0.5) + theme_bw()</code></pre>
+<pre class="r"><code>#plot data to get an overview
+wm &lt;- borders(&quot;world&quot;, colour=&quot;gray50&quot;, fill=&quot;gray50&quot;)
+ggplot()+ coord_fixed()+ wm +
+  geom_point(data = dat, aes(x = lng, y = lat),
+             colour = &quot;darkred&quot;, size = 0.5)+
+  theme_bw()</code></pre>
 <div id="spatial-issues" class="section level3">
 <h3>Spatial issues</h3>
 <p>We’ll first check coordinate validity to check if all coordinates are numeric and part of a lat/lon coordinate reference system using <code>cc_val</code>.</p>
@@ -508,7 +511,7 @@ ggplot() + coord_fixed() + wm + geom_point(data = dat, aes(x = lng, y = lat), co
 <pre class="r"><code>fl &lt;- cc_equ(dat, value = &quot;flagged&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;)
 
 # extract and check the flagged records
-fl_rec &lt;- dat[!fl, ]
+fl_rec &lt;- dat[!fl,] 
 head(fl_rec)</code></pre>
 <p>We’ll also test if the records are identical, or in close vicinity to the centroids of political units. You can modify the buffer around each centroid using the <code>buffer</code> argument and the level of testing (country centroids, province centroids, or both) using the <code>test argument</code>. In case you have a list of geographic coordinates you consider problematic, for instance a list of cities you can provide them as custom gazetteer using the <code>ref</code> argument.</p>
 <pre class="r"><code>fl &lt;- cc_cen(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;, value = &quot;flagged&quot;)
@@ -516,7 +519,7 @@ fl_rec &lt;- cl[!fl, ]
 unique(fl_rec$cc)
 cl &lt;- cl[fl, ]</code></pre>
 <p>Next we will test if the coordinates are within the country they are assigned to. This test is a bit more tricky, as it will also flag records, if the country name in the country column is not following ISO3 or if the records have been assigned during a different political landscape. For instance records from former Western and Eastern Germany. Here we need to convert the country annotation in column cc from ISO2 to ISO3; it is advisable to double check which records have be flagged, to avoid unnecessary data loss (see above).</p>
-<pre class="r"><code># adapt country code to ISO3, for country test
+<pre class="r"><code>#adapt country code to ISO3, for country test
 cs_ma &lt;- &quot;GBR&quot;
 names(cs_ma) &lt;- &quot;UK&quot;
 cl$cc_iso3 &lt;- countrycode(cl$cc, origin = &quot;iso2c&quot;, destination = &quot;iso3c&quot;, custom_match = cs_ma)
@@ -531,8 +534,8 @@ cl &lt;- cc_gbif(cl, lat = &quot;lat&quot;, lon = &quot;lng&quot;)</code></pre>
 <div id="temporal-issues" class="section level3">
 <h3>Temporal issues</h3>
 <p>The spatial cleaning above is mostly identical with steps from recent geographic records. Additionally  includes three functions to test the temporal dimension of fossils. Fossil ages are usually defined with a maximum and a minimum range, based on geological strata. First we will exclude records without dating information (NA) and then test for records with equal minimum and maximum range. Unless your data includes absolutely dated fossils, this will most likely be an data entry error.</p>
-<pre class="r"><code>cl &lt;- cl[!is.na(cl$late_age), ]
-cl &lt;- cl[!is.na(cl$early_age), ]
+<pre class="r"><code>cl &lt;- cl[!is.na(cl$late_age),]
+cl &lt;- cl[!is.na(cl$early_age),]
 cl &lt;- cf_equal(cl, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)</code></pre>
 <p>Next we will look at the age range (= max age - min age) of each record. The age range is the dating precision and can vary considerably, depending on the data available for dating. For many analyses, for instance in PyRate, very imprecisely dated records are not suitable. Lets first have a look at the age ranges in our test dataset.</p>
 <pre class="r"><code>rang &lt;- cl$early_age - cl$late_age
@@ -545,17 +548,20 @@ cl &lt;- cf_range(cl, taxon = &quot;&quot;, min_age = &quot;late_age&quot;, max_
 cl &lt;- cf_range(cl, taxon = &quot;taxon_name&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)
 
 # Absolute age limit
-cl &lt;- cf_range(cl, taxon = &quot;taxon_name&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;, method = &quot;time&quot;, max_range = 35)
+cl &lt;- cf_range(cl, taxon = &quot;taxon_name&quot;, min_age = &quot;late_age&quot;, 
+               max_age = &quot;early_age&quot;, method = &quot;time&quot;, max_range = 35)
 
 rang &lt;- cl$early_age - cl$late_age
 hist(rang, breaks = 40, xlab = &quot;Date range [max age - min age]&quot;, main = &quot;&quot;)
 </code></pre>
 <p>Finally we will test for outliers in space-time, that is records that are either very distant in space or in time from all other records (1) in the dataset (2) per taxon. The test is again based on quantile outlier detection and can be modified using various arguments. Here it is important to carefully consider the desired test sensitivity. See <code>?cf_outl</code> for help.</p>
 <pre class="r"><code># Outlier dataset
-cl &lt;- cf_outl(cl, taxon = &quot;&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)
+cl &lt;- cf_outl(cl, taxon = &quot;&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;,
+              min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)
 
 # Outlier taxon
-cl &lt;- cf_outl(cl, taxon = &quot;taxon_name&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;, min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)</code></pre>
+cl &lt;- cf_outl(cl, taxon = &quot;taxon_name&quot;, lat = &quot;lat&quot;, lon = &quot;lng&quot;,
+              min_age = &quot;late_age&quot;, max_age = &quot;early_age&quot;)</code></pre>
 <p>Done! To check how many records have been flagged in total, you can compare the two datasets.</p>
 <pre class="r"><code>nrow(dat) - nrow(cl)</code></pre>
 <p>So far so good, we have significantly refined the data for our needs. In section 6 we will have a look at the meta-data for further refinement, but before, note that there are two different ways to run <em>CoordinateCleaner</em>. You can connect all functions directly in a row using the magrittr pipe (%&gt;%) operator.</p>
@@ -567,13 +573,14 @@ cl &lt;- cf_outl(cl, taxon = &quot;taxon_name&quot;, lat = &quot;lat&quot;, lon 
 <div id="basic-taxonomy" class="section level3">
 <h3>Basic taxonomy</h3>
 <p>First we’ll take a short look at taxonomy. Fossil taxonomy is very complex and composite databases often have taxonomic issues that are extremely difficult to resolve. Here we will only do some very basic checks to test if: 1. all taxa in our dataset are plants, 2. they are at least identified to genus level.</p>
-<pre class="r"><code># 1. This looks OK
+<pre class="r"><code>#1. This looks OK
 table(cl$phylum)
 
-# 2. Taxonomic level of identification
+#2. Taxonomic level of identification
 table(cl$taxon_rank)</code></pre>
 <p>The required taxonomic level of course depends on the downstream analyses, but here we will exclude everything other than genus or species, which is a reasonable approach for most PyRate analyses.</p>
-<pre class="r"><code>cl &lt;- cl %&gt;% filter(taxon_rank %in% c(&quot;species&quot;, &quot;genus&quot;))</code></pre>
+<pre class="r"><code>cl &lt;- cl %&gt;%
+  filter(taxon_rank %in% c(&quot;species&quot;, &quot;genus&quot;))</code></pre>
 </div>
 <div id="spatial-coordinates" class="section level3">
 <h3>Spatial coordinates</h3>
@@ -584,15 +591,17 @@ table(cl$taxon_rank)</code></pre>
 <div id="time" class="section level3">
 <h3>Time</h3>
 <p>We have checked for potentially problematic records in time and space above, but it is definitively advisable to check again.</p>
-<pre class="r"><code># minimum ages
+<pre class="r"><code>#minimum ages
 tail(table(cl$late_age))
 
-ggplot(cl) + geom_histogram(aes(x = late_age))
+ggplot(cl)+
+  geom_histogram(aes(x = late_age))
 
-# maximum ages
+#maximum ages
 tail(table(cl$early_age))
 
-ggplot(cl) + geom_histogram(aes(x = early_age))</code></pre>
+ggplot(cl)+
+  geom_histogram(aes(x = early_age))</code></pre>
 <p>The minimum and maximum ages look unproblematic, but there are still some records with very large temporal uncertainties, and at least one case where the minimum and maximum age seem reversed. This might be informative in some cases, but for most analysis this might be problematic, so here we exclude all records with temporal uncertainty which will retain 95% of the data. This is an arbitrary choice, and you’ll have to choose a more suitable value based on your planned analyses.</p>
 </div>
 </div>

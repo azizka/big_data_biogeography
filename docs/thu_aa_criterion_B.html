@@ -461,7 +461,7 @@ $(document).ready(function () {
 </div>
 <div id="learning-objectives" class="section level1">
 <h1>Learning objectives</h1>
-<p>After this exercise you will be abler to * Approximate species range sizes based on occurrence records * Conduct an automated preliminary conservation assessment for multiple species based on occurrence records and Criterion B of the International Union for the conservation of Nature.</p>
+<p>After this exercise you will be able to * Approximate species range sizes based on occurrence records * Conduct an automated preliminary conservation assessment for multiple species based on occurrence records and Criterion B of the International Union for the conservation of Nature.</p>
 </div>
 <div id="data-needed" class="section level1">
 <h1>Data needed</h1>
@@ -473,7 +473,6 @@ $(document).ready(function () {
 <div id="exercises" class="section level1">
 <h1>Exercises</h1>
 <ol style="list-style-type: decimal">
-<li>Batch calculate EOO and AOO for your the species in your group of interest</li>
 <li>Do a preliminary conservation assessment of your group following IUCN Criterion B using the ConR package. You can find a detailed tutorial <a href="https://cran.r-project.org/web/packages/ConR/vignettes/my-vignette.html">here</a>. (<code>IUCN.eval</code>)</li>
 <li>Compare automated preliminary assessments with the IUCN Red list assessments.</li>
 </ol>
@@ -488,8 +487,7 @@ $(document).ready(function () {
 </div>
 <div id="library-setup" class="section level1">
 <h1>Library setup</h1>
-<pre class="r"><code>library(rCAT)
-library(ConR)
+<pre class="r"><code>library(ConR)
 library(readr)
 library(dplyr)
 library(rredlist)
@@ -497,48 +495,69 @@ library(jsonlite)</code></pre>
 </div>
 <div id="tutorial" class="section level1">
 <h1>Tutorial</h1>
-<div id="estimation-of-extend-of-occurrence-and-area-of-occupancy-for-many-species" class="section level2">
-<h2>1. Estimation of Extend of Occurrence and Area of Occupancy for many species</h2>
-<p>The Extent of Occurrence (EOO) and Area of Occupancy (AOO) are basis for conservation assessments following Criterion B. One way to to batch calculate these indices for many species is the rCat package in R. You can caluclate EOO and AOO from occurrence records.</p>
-<pre class="r"><code># load occurrence data
-records &lt;- read_csv(&quot;example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv&quot;)
-
-
-eoo_aoo &lt;- rCAT::ConBatch(taxa = records$species, lat = records$decimalLatitude, lon = records$decimalLongitude, cellsize = 2000)</code></pre>
-</div>
+<!-- ## 1. Estimation of Extend of Occurrence and Area of Occupancy for many species -->
+<!-- The Extent of Occurrence (EOO) and Area of Occupancy (AOO) are basis for conservation assessments following Criterion B. One way to to batch calculate these indices for many species is the rCat package in R. You can caluclate EOO and AOO from occurrence records. -->
+<!-- ```{r} -->
+<!-- # load occurrence data -->
+<!-- records <- read_csv("example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv") -->
+<!-- eoo_aoo<- rCAT::ConBatch(taxa = records$species, -->
+<!--                            lat = records$decimalLatitude, -->
+<!--                            lon = records$decimalLongitude, -->
+<!--                            cellsize = 2000)  -->
+<!-- ```    -->
 <div id="conr-automated-conservation-assessment" class="section level2">
-<h2>2. ConR Automated conservation assessment</h2>
-<p>EOO and AOO alone are not sufficient for an assessment following IUCN Criterion B. You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. T His is based on the EOO we have encountered above and additionally the Area of Occupancy and the number of subpopulations.</p>
+<h2>1. ConR automated conservation assessment</h2>
+<p>You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR.</p>
 <pre class="r"><code># Format input data for ConR
-inp &lt;- records %&gt;% filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% dplyr::select(ddlat = decimalLatitude, 
-    ddlon = decimalLongitude, tax = species)
+inp &lt;- records%&gt;%
+  filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% 
+  dplyr::select(ddlat = decimalLatitude,
+                ddlon = decimalLongitude, 
+                tax = species)
 
 # Preliminary assessment
 ev &lt;- IUCN.eval(inp)
 ev</code></pre>
 </div>
-<div id="comparing-automated-assessment-and-iucn-staus" class="section level2">
-<h2>3. Comparing automated assessment and IUCN staus</h2>
+<div id="comparing-automated-assessment-and-iucn-status" class="section level2">
+<h2>2. Comparing automated assessment and IUCN status</h2>
 <p>Now we can combine the automated assessment with the existing IUCN assessments, to compare them.</p>
 <pre class="r"><code># load IUCN Red List from Day 1
 iucn &lt;- read_csv(&quot;example_data/bombacoideae_iucn_redlist_assessments.csv&quot;)
 
-out &lt;- ev %&gt;% left_join(iucn, by = c(taxa = &quot;scientific_name&quot;))
+out &lt;- ev %&gt;% 
+  left_join(iucn,  by = c(&quot;taxa&quot; = &quot;scientific_name&quot;))
 
 # compare the important indices
-test &lt;- out %&gt;% select(taxa, automated_eoo = EOO, automated_AOO = AOO, automated_Category_CriteriaB = Category_CriteriaB, iucn_eoo = eoo_km2, 
-    iucn_aoo = aoo_km2, iucn_year = published_year, iucn_category = category, iucn_criteria = criteria)
+test &lt;- out %&gt;% 
+  select(taxa, 
+         automated_eoo = EOO, 
+         automated_AOO = AOO, 
+         automated_Category_CriteriaB = Category_CriteriaB,
+         iucn_eoo = eoo_km2,
+         iucn_aoo = aoo_km2,
+         iucn_year = published_year,
+         iucn_category = category, 
+         iucn_criteria = criteria)
 
 # plot for easy evaluation
-plo &lt;- test %&gt;% filter(!is.na(iucn_category)) %&gt;% mutate(iucn_eoo = parse_numeric(iucn_eoo))
+plo &lt;- test %&gt;% 
+  filter(!is.na(iucn_category)) %&gt;% 
+  mutate(iucn_eoo = parse_numeric(iucn_eoo))
 
-ggplot(data = plo) + geom_abline(slope = 1, intercept = 0) + geom_point(aes(x = automated_eoo, y = iucn_eoo)) + theme_bw()
+ggplot(data = plo)+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point(aes(x = automated_eoo, y = iucn_eoo))+
+  theme_bw()
 
-ggplot(data = plo) + geom_abline(slope = 1, intercept = 0) + geom_point(aes(x = automated_AOO, y = iucn_aoo)) + theme_bw()
+ggplot(data = plo)+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point(aes(x = automated_AOO, y = iucn_aoo))+
+  theme_bw()
 </code></pre>
 </div>
 <div id="write-to-disk" class="section level2">
-<h2>4. Write to disk</h2>
+<h2>3. Write to disk</h2>
 <pre class="r"><code>write_csv(test, &quot;preliminary_assessment_criterionB.csv&quot;)</code></pre>
 </div>
 </div>

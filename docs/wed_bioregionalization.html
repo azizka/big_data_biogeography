@@ -494,15 +494,19 @@ library(tidyverse)</code></pre>
 <h1>Tutorial</h1>
 <div id="convert-a-geojson-file-into-a-shape-file" class="section level2">
 <h2>Convert a GeoJson file into a shape file</h2>
-<pre class="r"><code>inp &lt;- geojsonio::geojson_read(&quot;example_data/bombacoids_ranges_ingroup_0712_bioregions.geojson&quot;, what = &quot;sp&quot;)
+<pre class="r"><code>inp &lt;- geojsonio::geojson_read(&quot;example_data/bombacoids_ranges_ingroup_0712_bioregions.geojson&quot;,
+                        what = &quot;sp&quot;)
 
 dat &lt;- st_as_sf(inp)
 
 # plot the rbioregions
-ggplot() + geom_sf(data = dat, aes(fill = as.factor(bioregion)))
+ggplot() + 
+  geom_sf(data = dat, aes(fill = as.factor(bioregion)))
 
-st_write(obj = dat, dsn = &quot;example_data&quot;, layer = &quot;bombacoideae_infomap_shapefile&quot;, driver = &quot;ESRI Shapefile&quot;, delete_layer = TRUE, 
-    delete_dsn = TRUE)</code></pre>
+st_write(obj = dat, dsn = &quot;example_data&quot;, layer = &quot;bombacoideae_infomap_shapefile&quot;, 
+         driver = &quot;ESRI Shapefile&quot;, 
+         delete_layer=TRUE,
+         delete_dsn=TRUE)</code></pre>
 </div>
 </div>
 

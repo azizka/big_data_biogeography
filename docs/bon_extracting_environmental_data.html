@@ -484,10 +484,13 @@ env &lt;- raster(&quot;example_data/bonus/wc2.0_bio_5m_01.tif&quot;)</code></pre
 <div id="extract-values" class="section level2">
 <h2>Extract values</h2>
 <pre class="r"><code># Generate a spatial object with the coordinates
-pts &lt;- occ %&gt;% dplyr::select(decimalLongitude, decimalLatitude) %&gt;% as.matrix()
+pts &lt;- occ %&gt;% 
+  dplyr::select(decimalLongitude, decimalLatitude) %&gt;% 
+  as.matrix()
 
 # Extract the environmental values
-ext &lt;- raster::extract(env, pts) %&gt;% enframe(name = NULL, value = &quot;MAT&quot;)
+ext &lt;- raster::extract(env, pts) %&gt;% 
+  enframe(name = NULL, value = &quot;MAT&quot;)
 
 # Bind coordinates and environmental variables
 out &lt;- bind_cols(occ, ext)

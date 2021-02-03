@@ -497,18 +497,19 @@ library(rgeos)</code></pre>
 <div id="download-data-for-a-single-species-we-saw-in-the-filedand-save-them-in-a-data.frame" class="section level2">
 <h2>1. Download data for a single species we saw in the filedand save them in a data.frame</h2>
 <p>GBIF hosts a large number of records and downloading all records might take some time (also the download limit using <code>occ_search</code> is 250,000), so it is worth checking first how many records are available. We do this using the <code>return</code> argument of the <code>occ_search</code> function, which will only return meta-data on the record. Chose a species from your project taxon, for demonstration will download records for the Malvaceae family. We’ll first download data for a single, wide-spread species, <em>Ceiba pentandra</em>. Note that here we limit the maximum number of records to 1000.</p>
-<pre class="r"><code># Search occurrence records
-dat &lt;- occ_search(scientificName = &quot;Ceiba pentandra&quot;, limit = 1000)$data
+<pre class="r"><code>#Search occurrence records
+dat &lt;- occ_search(scientificName = &quot;Ceiba pentandra&quot;, 
+                  limit = 1000)$data
 
-nrow(dat)  # Check the number of records
-head(dat)  # Check the data
-plot(dat$decimalLatitude ~ dat$decimalLongitude)  # Look at the georeferenced records</code></pre>
+nrow(dat) # Check the number of records
+head(dat) # Check the data
+plot(dat$decimalLatitude ~ dat$decimalLongitude) # Look at the georeferenced records</code></pre>
 <p>So luckily there are a good number of records available. An as the quick visualization shows, a lot of the have geographic coordinates.</p>
 </div>
 <div id="obtain-occurrences-for-multiple-species-using-taxon-ids" class="section level2">
 <h2>2. Obtain occurrences for multiple species using taxon IDs</h2>
 <p>For your project, we are interested not only in one species, but a list of species. There are multiple ways to batch download data, you can for instance use the higher taxonomic group. HOwever, the specific group may not be part of the taxonomic backbone of GBIF. In this case you can obtain data using a list of genera or species. In any case, it is a good idea, to use the GBIF taxon IDs rather than the scientific name, since this will also include synonyms. You can get the ID with the <code>get_gbifid_</code> function of the taxize package. A simple example is to do this for an individual name, for instance a higher taxonomic rank.</p>
-<pre class="r"><code>ID &lt;- taxize::get_gbifid_(&quot;Ceiba pentandra&quot;, method = &quot;backbone&quot;)</code></pre>
+<pre class="r"><code>ID &lt;- taxize::get_gbifid_(&quot;Ceiba pentandra&quot;, method=&quot;backbone&quot;)</code></pre>
 <p>The gbif ID is in the usagekey column. There are multiple matches for our name, so we will need to chose which one is the correct one. One simple option is to only retain names that are accepted and matched exactly.</p>
 <pre class="r"><code>ID &lt;- ID %&gt;% 
   bind_rows() %&gt;% # get_gbifid_ returns a list, convert to data.frame
@@ -539,7 +540,7 @@ gbif_taxon_keys_addition &lt;-
   imap(~ .x %&gt;% mutate(original_sciname = .y)) %&gt;% # add original name back into data.frame
   bind_rows()</code></pre>
 <p>So, in this case there are multiple reasons, including that the GBIF taxonomy considers some of the names on our list as synonyms and that some names could not be match exactly. How to solve these issues will depend on a case by case studies. If you can, the best solution is to resolve issues for your group of interest by choosing the correct name for the remaining taxa individually. Since we are interested in large-scale approaches, we will proceed with the names we could resolve with the above two tier approach automatically.</p>
-<pre class="r"><code>gbif_taxon_keys &lt;- bind_rows(gbif_taxon_keys, gbif_taxon_keys_addition)
+<pre class="r"><code>gbif_taxon_keys &lt;-  bind_rows(gbif_taxon_keys, gbif_taxon_keys_addition)
 
 # check the number of records per species
 sapply(gbif_taxon_keys$usagekey, &quot;occ_count&quot;)</code></pre>
@@ -552,32 +553,60 @@ sapply(gbif_taxon_keys$usagekey, &quot;occ_count&quot;)</code></pre>
 # download data
 user &lt;- &quot;YOUR ACCOUNT AT www.gbif.org&quot;
 pwd &lt;- &quot;YOUR PW&quot;
-email &lt;- &quot;YOUR EMAIL&quot;
+email &lt;-  &quot;YOUR EMAIL&quot;
 
-occ_download(pred_in(&quot;taxonKey&quot;, unique(gbif_taxon_keys$usagekey)), pred(&quot;hasCoordinate&quot;, TRUE), format = &quot;SIMPLE_CSV&quot;, user = user, 
-    pwd = pwd, email = email)
+occ_download(
+  pred_in(&quot;taxonKey&quot;, unique(gbif_taxon_keys$usagekey)),
+  pred(&quot;hasCoordinate&quot;, TRUE),
+  format = &quot;SIMPLE_CSV&quot;,
+  user=user,
+  pwd=pwd,
+  email=email
+)
 </code></pre>
 <div id="download-records-for-a-higher-taxonomic-group-including-your-group-of-interest." class="section level2">
 <h2>4. Download records for a higher taxonomic group including your group of interest.</h2>
 <p>One way to focus the download is to focus on a specific region. Chose a focus for the higher taxon for your group of interest. For our example data we will download all occurrence records of Malvaceae from South America.</p>
 <p>You can now download the records for South America. Since we want to work with coordinates, we will only download those records that do have coordinates.</p>
 <pre class="r"><code>
-occ_download(pred_in(&quot;taxonKey&quot;, ID_fam$usagekey), pred(&quot;hasCoordinate&quot;, TRUE), pred(&quot;continent&quot;, &quot;South America&quot;), format = &quot;SIMPLE_CSV&quot;, 
-    user = user, pwd = pwd, email = email)</code></pre>
+occ_download(
+  pred_in(&quot;taxonKey&quot;, ID_fam$usagekey),
+  pred(&quot;hasCoordinate&quot;, TRUE),
+  pred(&quot;continent&quot;, &quot;South America&quot;),
+  format = &quot;SIMPLE_CSV&quot;,
+  user=user,
+  pwd=pwd,
+  email=email
+)</code></pre>
 <p>Often it is desirable to only obtain records for a custom geographic area. One option to achieve this is to download all data for a group and then subset using a user-defined polygon. However, rgbif/GBIF also provide the option to only download records from a custom area. To do this, you will need to define a polygon of the area of interst using the Well-known-text-format (WKT).To do this you can use the Well-known-text format (WKT) to specify an area. Here we use a very simple rectangle, feel free to experiment. The WKT format is a bit tricky, see the geometry section of <code>?occ_download</code> for more information.</p>
 <pre class="r"><code>study_area &lt;- &quot;POLYGON((-35 -4.5, -38.5 -4.5, -38.5 -7, -35 -7, -35 -4.5))&quot;
 
-occ_download(pred_in(&quot;taxonKey&quot;, ID_fam$usagekey), pred(&quot;hasCoordinate&quot;, TRUE), pred_within(study_area), format = &quot;SIMPLE_CSV&quot;, 
-    user = user, pwd = pwd, email = email)
+occ_download(
+  pred_in(&quot;taxonKey&quot;, ID_fam$usagekey),
+  pred(&quot;hasCoordinate&quot;, TRUE),
+  pred_within(study_area),
+  format = &quot;SIMPLE_CSV&quot;,
+  user=user,
+  pwd=pwd,
+  email=email
+)
 </code></pre>
 <p>If you have a more complex polygon, it is often easier to define it in a graphical user interface software, for instance google earth, and import the resulting .kml or.shp file into R using the <code>readOGR</code> function of the <code>rgdal</code> library and convert it into WKT format using <code>writeWKT</code> from the <code>rgeos</code> package.</p>
 <pre class="r"><code>amz &lt;- readOGR(&quot;example_data/day1_biodiversity_databases/Amazonia.kml&quot;)
-# or for shape files: amz &lt;- readOGR(&#39;inst&#39;, layer = &#39;Amazonia&#39;)
+#or for shape files:
+#amz &lt;- readOGR(&quot;inst&quot;, layer = &quot;Amazonia&quot;)
 
 study_area &lt;- rgeos::writeWKT(amz)
 
-occ_download(pred_in(&quot;taxonKey&quot;, ID_fam$usagekey), pred(&quot;hasCoordinate&quot;, TRUE), pred_within(study_area), format = &quot;SIMPLE_CSV&quot;, 
-    user = user, pwd = pwd, email = email)
+occ_download(
+  pred_in(&quot;taxonKey&quot;, ID_fam$usagekey),
+  pred(&quot;hasCoordinate&quot;, TRUE),
+  pred_within(study_area),
+  format = &quot;SIMPLE_CSV&quot;,
+  user=user,
+  pwd=pwd,
+  email=email
+)
 </code></pre>
 </div>
 <div id="save-the-downloaded-data-as-.csv-to-the-working-directory." class="section level2">
