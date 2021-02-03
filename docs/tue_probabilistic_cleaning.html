@@ -440,9 +440,7 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="https://github.com/azizka/big_data_biogeography">GitHub</a>
-</li>
+        
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -494,7 +492,8 @@ plotOcc(pts)</code></pre>
 <li><p>biogeo=TRUE is the default of the function, if you are using <em>bRacatus</em> just to calculate the estimated accuracy of your point records, you will save computational time by setting biogeo=FALSE.</p></li>
 <li><p>This function uses a huge distance matrix hosted remotely. If the internet velocity prevents us from connecting to them all at the same time. You can also load the data for this example runing this line of code <em>data(signals)</em></p></li>
 </ol>
-<pre class="r"><code>signals &lt;- signalCalculation(ref_reg, pts, biogeo = TRUE)</code></pre>
+<pre class="r"><code>data(signals)
+signals &lt;- signalCalculation(ref_reg, pts, biogeo = TRUE)</code></pre>
 <p>6- Now that we have calculated the three indices, we’ll use the <em>presence</em> index to model the estimated accuracy of the records, and both the <em>nativeness</em> and <em>alieness</em> indices for their biogeographical status. The functions are <em>accuracy</em>, and <em>biogeoStatus</em>. The outputs of these functions are the dataFrame downloaded from GBIF containing the species occurrence information and an extra column indicating the estimated accuracy and biogeographical status of each point, respectively.</p>
 <pre class="r"><code>acc &lt;- accuracy(signals)
 biogeo &lt;- biogeoStatus(signals)</code></pre>
@@ -521,7 +520,8 @@ plotOcc(pts3)  # Running time: &lt; 1s.</code></pre>
 range_map_ref_reg &lt;- rangeMaps(ref_reg)  # Running time: &lt; 1s.
 plotRefReg(range_map_ref_reg)  # Running time: &lt; 1s.</code></pre>
 <p>4- Calculate the signals. Or just load the object that is also already saved for this example (code = data(signals_3).)</p>
-<pre class="r"><code>signals_3 &lt;- signalCalculation(range_map_ref_reg, pts3, biogeo = TRUE)  # Running time: \230 40s.</code></pre>
+<pre class="r"><code>data(signals_3)
+signals_3 &lt;- signalCalculation(range_map_ref_reg, pts3, biogeo = TRUE)  # Running time: \230 40s.</code></pre>
 <p>5- Now we apply the models.</p>
 <pre class="r"><code>acc &lt;- accuracy(signals_3)  # Running time: &lt; 1s.
 biogeo &lt;- biogeoStatus(signals_3)  # Running time: &lt; 1s.</code></pre>
@@ -540,7 +540,7 @@ plotBiogeoStatus(biogeo, regional = T, reg.by = &quot;points&quot;, borders = F,
 <p>1- <strong>The point data</strong>. If you have your own data, input it with the function <em>giveOcc</em>. In this example I use a fictional South American mammal species.</p>
 <p>If you want to use GBIF data, just use the function <em>getOcc</em> as we did before. However, don’t forget that we also need the reference region data, so chose a species that has reference regions available, and ideally has native and alien distributions represented in these reference regions. You have three main options:</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>You can chose a species from this list <a href="file:///C:/Users/ca13kute/AppData/Local/Temp/Table_S2.pdf">here</a>. All of them have range maps available on the IUCN website (more about getting these maps in the next step). Note two important column in this table: <em>Alien_range</em> where 1 means that the species is alien somewhere, those are the ones we want; <em>n_points</em> the number of points GBIF has for the species, we don’t want too few nor way too many (10 - 500).</p></li>
+<li><p>You can chose a species from this list <a href="https://zenodo.org/record/4439197#.YBluxnko-cK">here</a>. All of them have range maps available on the IUCN website (more about getting these maps in the next step). Note two important column in this table: <em>Alien_range</em> where 1 means that the species is alien somewhere, those are the ones we want; <em>n_points</em> the number of points GBIF has for the species, we don’t want too few nor way too many (10 - 500).</p></li>
 <li><p>If you don’t mind working plants, the function <em>giftRegions</em> is an option to get checklists.</p></li>
 <li><p>A third option is using the Global Register of Introduced and Invasive Species (GRIIS), that focus mostly on alien species that have become invasive, and provide checklists per country. The problem with GRIIS is that they don’t inform the native range of the species, which means we have to find it ourselves.</p></li>
 </ol>
@@ -574,8 +574,8 @@ plotRefReg(ref_reg)  #it is not going to work! </code></pre>
 <p>4- Calculate the signals.</p>
 <pre class="r"><code>signals &lt;- signalCalculation(ref_reg, sps_occurrence, biogeo = TRUE)  # Running time: \230 40s.</code></pre>
 <p>5- Apply the models.</p>
-<pre class="r"><code>acc &lt;- accuracy(signals_3)  # Running time: &lt; 1s.
-biogeo &lt;- biogeoStatus(signals_3)  # Running time: &lt; 1s.</code></pre>
+<pre class="r"><code>acc &lt;- accuracy(signals)  # Running time: &lt; 1s.
+biogeo &lt;- biogeoStatus(signals)  # Running time: &lt; 1s.</code></pre>
 <p>6- Now your own maps!</p>
 <pre class="r"><code>plotAccuracy(acc, regional = T, reg.by = &quot;points&quot;, borders = T, col.features = &quot;cyan&quot;, col.bg = &quot;white&quot;, box = T)  # Running time: &lt; 1s.
 

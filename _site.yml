@@ -82,10 +82,6 @@ navbar:
     - text: Identifying areas of endemism
       href: fr_overview.html
 
-  right:
-  - text: GitHub
-    href: https://github.com/azizka/big_data_biogeography
-  
 output:
   html_document:
     lib_dir: site_libs
