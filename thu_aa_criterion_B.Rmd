@@ -6,7 +6,7 @@ output:  html_document
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=12, fig.height=8, eval = FALSE,
                       echo=TRUE, warning=FALSE, message=FALSE,
-                      tidy = TRUE, collapse = TRUE,
+                      tidy = FALSE, collapse = TRUE,
                       results = 'hold')
 ```
 # Background
@@ -14,7 +14,9 @@ Species occurrence records can be used to approximate species ranges and generat
 
 # Learning objectives
 After this exercise you will be able to 
+
 * Approximate species range sizes based on occurrence records
+
 * Conduct an automated preliminary conservation assessment for multiple species based on occurrence records and Criterion B of the International Union for the conservation of Nature.
 
 # Data needed
@@ -56,15 +58,18 @@ library(jsonlite)
 
 
 ## 1. ConR automated conservation assessment 
-You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR.
+You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR. This can take some time!
 
 ```{r, eval=FALSE}
 # Format input data for ConR
 records <- read_csv("example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv")
 
+# if you want to have a quick go, you can limit the list to the first 10 species
+records <- records %>% 
+  filter(species %in% unique(records$species)[1:10])
+
 inp <- records%>%
-  #filter(!species %in% c("Adansonia digitata", "Bombax ceiba", "Ceiba pentandra")) %>% 
-  filter(decimallongitude < 60 & decimallogitude > -110) #limit to the natural range of spces, since ranges > 180 degrees are not feasible
+  filter(decimalLongitude < 60 & decimalLongitude > -110) %>%  #limit to the natural range of spces, since ranges > 180 degrees are not feasible
   dplyr::select(ddlat = decimalLatitude,
                 ddlon = decimalLongitude, 
                 tax = species)
@@ -74,19 +79,21 @@ ev <- IUCN.eval(inp)
 ev
 ```
 
+For more detailed information ConR, see the vignette on "How to use ConR (for beginners in R)" at https://mran.microsoft.com/snapshot/2017-02-04/web/packages/ConR/vignettes/my-vignette.html.
+
 ## 2. Comparing automated assessment and IUCN status
 Now we can combine the automated assessment with the existing IUCN assessments, to compare them.
 
 ```{r}
 # load IUCN Red List from Day 1
-iucn <- read_csv("example_data/bombacoideae_iucn_redlist_assessments.csv")
+iucn <- read_csv("C:/Users/az64mycy/Dropbox (iDiv)/teaching/2021_big_data_biogeography_physalis/example_data/day4_conservation_assessments/bombacoideae_iucn_redlist_assessments.csv")
 
 out <- ev %>% 
   left_join(iucn,  by = c("taxa" = "scientific_name"))
 
 # compare the important indices
 test <- out %>% 
-  select(taxa, 
+  dplyr::select(taxa, 
          automated_eoo = EOO, 
          automated_AOO = AOO, 
          automated_Category_CriteriaB = Category_CriteriaB,
@@ -99,18 +106,33 @@ test <- out %>%
 # plot for easy evaluation
 plo <- test %>% 
   filter(!is.na(iucn_category)) %>% 
-  mutate(iucn_eoo = parse_numeric(iucn_eoo))
+  mutate(iucn_eoo = parse_number(iucn_eoo))
 
+#EOO
 ggplot(data = plo)+
   geom_abline(slope = 1, intercept = 0)+
   geom_point(aes(x = automated_eoo, y = iucn_eoo))+
   theme_bw()
 
+#AOO
 ggplot(data = plo)+
   geom_abline(slope = 1, intercept = 0)+
   geom_point(aes(x = automated_AOO, y = iucn_aoo))+
   theme_bw()
 
+#A confusion matrix of those species that did have an IUCN assessment
+plo <- test %>% 
+  dplyr::select(taxa, automated_Category_CriteriaB, iucn_category) %>% 
+  mutate(iucn_category = recode(iucn_category, 
+                                 LC = "LC or NT",
+                                 NT = "LC or NT",
+                                 `LR/nt` = "LC or NT"))
+
+plo$automated_Category_CriteriaB <- factor(plo$automated_Category_CriteriaB, levels = c("CR", "EN", "VU", "LC or NT"))
+plo$iucn_category <- factor(plo$iucn_category, levels = c("CR", "EN", "VU", "LC or NT", "DD"))
+
+# automated assessments are rows, IUCN assessments are columns
+table(plo$automated_Category_CriteriaB, plo$iucn_category)
 ```
 
 ## 3. Write to disk

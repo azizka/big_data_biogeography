@@ -461,7 +461,11 @@ $(document).ready(function () {
 </div>
 <div id="learning-objectives" class="section level1">
 <h1>Learning objectives</h1>
-<p>After this exercise you will be able to * Approximate species range sizes based on occurrence records * Conduct an automated preliminary conservation assessment for multiple species based on occurrence records and Criterion B of the International Union for the conservation of Nature.</p>
+<p>After this exercise you will be able to</p>
+<ul>
+<li><p>Approximate species range sizes based on occurrence records</p></li>
+<li><p>Conduct an automated preliminary conservation assessment for multiple species based on occurrence records and Criterion B of the International Union for the conservation of Nature.</p></li>
+</ul>
 </div>
 <div id="data-needed" class="section level1">
 <h1>Data needed</h1>
@@ -507,37 +511,76 @@ library(jsonlite)</code></pre>
 <!-- ```    -->
 <div id="conr-automated-conservation-assessment" class="section level2">
 <h2>1. ConR automated conservation assessment</h2>
-<p>You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR.</p>
+<p>You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR. This can take some time!</p>
 <pre class="r"><code># Format input data for ConR
 records &lt;- read_csv(&quot;example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv&quot;)
 
-inp &lt;- records %&gt;% # filter(!species %in% c(&#39;Adansonia digitata&#39;, &#39;Bombax ceiba&#39;, &#39;Ceiba pentandra&#39;)) %&gt;%
-filter(decimallongitude &lt; 60 &amp; decimallogitude &gt; -110)  #limit to the natural range of spces, since ranges &gt; 180 degrees are not feasible
-dplyr::select(ddlat = decimalLatitude, ddlon = decimalLongitude, tax = species)
+# if you want to have a quick go, you can limit the list to the first 10 species
+records &lt;- records %&gt;% 
+  filter(species %in% unique(records$species)[1:10])
+
+inp &lt;- records%&gt;%
+  filter(decimalLongitude &lt; 60 &amp; decimalLongitude &gt; -110) %&gt;%  #limit to the natural range of spces, since ranges &gt; 180 degrees are not feasible
+  dplyr::select(ddlat = decimalLatitude,
+                ddlon = decimalLongitude, 
+                tax = species)
 
 # Preliminary assessment
 ev &lt;- IUCN.eval(inp)
 ev</code></pre>
+<p>For more detailed information ConR, see the vignette on “How to use ConR (for beginners in R)” at <a href="https://mran.microsoft.com/snapshot/2017-02-04/web/packages/ConR/vignettes/my-vignette.html" class="uri">https://mran.microsoft.com/snapshot/2017-02-04/web/packages/ConR/vignettes/my-vignette.html</a>.</p>
 </div>
 <div id="comparing-automated-assessment-and-iucn-status" class="section level2">
 <h2>2. Comparing automated assessment and IUCN status</h2>
 <p>Now we can combine the automated assessment with the existing IUCN assessments, to compare them.</p>
 <pre class="r"><code># load IUCN Red List from Day 1
-iucn &lt;- read_csv(&quot;example_data/bombacoideae_iucn_redlist_assessments.csv&quot;)
+iucn &lt;- read_csv(&quot;C:/Users/az64mycy/Dropbox (iDiv)/teaching/2021_big_data_biogeography_physalis/example_data/day4_conservation_assessments/bombacoideae_iucn_redlist_assessments.csv&quot;)
 
-out &lt;- ev %&gt;% left_join(iucn, by = c(taxa = &quot;scientific_name&quot;))
+out &lt;- ev %&gt;% 
+  left_join(iucn,  by = c(&quot;taxa&quot; = &quot;scientific_name&quot;))
 
 # compare the important indices
-test &lt;- out %&gt;% select(taxa, automated_eoo = EOO, automated_AOO = AOO, automated_Category_CriteriaB = Category_CriteriaB, iucn_eoo = eoo_km2, iucn_aoo = aoo_km2, iucn_year = published_year, 
-    iucn_category = category, iucn_criteria = criteria)
+test &lt;- out %&gt;% 
+  dplyr::select(taxa, 
+         automated_eoo = EOO, 
+         automated_AOO = AOO, 
+         automated_Category_CriteriaB = Category_CriteriaB,
+         iucn_eoo = eoo_km2,
+         iucn_aoo = aoo_km2,
+         iucn_year = published_year,
+         iucn_category = category, 
+         iucn_criteria = criteria)
 
 # plot for easy evaluation
-plo &lt;- test %&gt;% filter(!is.na(iucn_category)) %&gt;% mutate(iucn_eoo = parse_numeric(iucn_eoo))
+plo &lt;- test %&gt;% 
+  filter(!is.na(iucn_category)) %&gt;% 
+  mutate(iucn_eoo = parse_number(iucn_eoo))
 
-ggplot(data = plo) + geom_abline(slope = 1, intercept = 0) + geom_point(aes(x = automated_eoo, y = iucn_eoo)) + theme_bw()
+#EOO
+ggplot(data = plo)+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point(aes(x = automated_eoo, y = iucn_eoo))+
+  theme_bw()
 
-ggplot(data = plo) + geom_abline(slope = 1, intercept = 0) + geom_point(aes(x = automated_AOO, y = iucn_aoo)) + theme_bw()
-</code></pre>
+#AOO
+ggplot(data = plo)+
+  geom_abline(slope = 1, intercept = 0)+
+  geom_point(aes(x = automated_AOO, y = iucn_aoo))+
+  theme_bw()
+
+#A confusion matrix of those species that did have an IUCN assessment
+plo &lt;- test %&gt;% 
+  dplyr::select(taxa, automated_Category_CriteriaB, iucn_category) %&gt;% 
+  mutate(iucn_category = recode(iucn_category, 
+                                 LC = &quot;LC or NT&quot;,
+                                 NT = &quot;LC or NT&quot;,
+                                 `LR/nt` = &quot;LC or NT&quot;))
+
+plo$automated_Category_CriteriaB &lt;- factor(plo$automated_Category_CriteriaB, levels = c(&quot;CR&quot;, &quot;EN&quot;, &quot;VU&quot;, &quot;LC or NT&quot;))
+plo$iucn_category &lt;- factor(plo$iucn_category, levels = c(&quot;CR&quot;, &quot;EN&quot;, &quot;VU&quot;, &quot;LC or NT&quot;, &quot;DD&quot;))
+
+# automated assessments are rows, IUCN assessments are columns
+table(plo$automated_Category_CriteriaB, plo$iucn_category)</code></pre>
 </div>
 <div id="write-to-disk" class="section level2">
 <h2>3. Write to disk</h2>
