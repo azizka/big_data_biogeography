@@ -58,24 +58,40 @@ library(jsonlite)
 
 
 ## 1. ConR automated conservation assessment 
-You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR. This can take some time!
+You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR. This can take some time! REmember to adapt the filtering step.
+
+For ConR to work it is necessary for the dataset to only exclude species with a range spanning less than 180 degrees. So, in case you have widespread species you need to either remove them or cut the records to a certain geographic extent below there is an example for each case.
 
 ```{r, eval=FALSE}
 # Format input data for ConR
 records <- read_csv("example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv")
 
-# if you want to have a quick go, you can limit the list to the first 10 species
+# OPTIONAL: remove part of the records to ensure the range is < 180 degrees
+# The numbers represent decimal degrees, and are adapted to our example data.
+# You will need to adapt them to your own data
+inp <- records%>%
+  filter(decimalLongitude < 60 & decimalLongitude > -110)
+
+# OPTIONAL: Alternatively remove widespread species by name
+inp <- records%>%
+  filter(!species %in% c("Adansonia digitata"))
+
+# OPTIONAL: In case you want to have a quick go for the sake of the exercise,
+#you can take a subset of species, here the first 10
 records <- records %>% 
   filter(species %in% unique(records$species)[1:10])
 
-inp <- records%>%
-  filter(decimalLongitude < 60 & decimalLongitude > -110) %>%  #limit to the natural range of spces, since ranges > 180 degrees are not feasible
+# Rename the columns to fit the ConR requirements
+inp <- records %>% 
   dplyr::select(ddlat = decimalLatitude,
                 ddlon = decimalLongitude, 
                 tax = species)
 
-# Preliminary assessment
+# Preliminary assessment using ConR
+# See ?ConR for additional options
 ev <- IUCN.eval(inp)
+
+# look at the result
 ev
 ```
 
