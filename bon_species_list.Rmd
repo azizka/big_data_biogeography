@@ -20,19 +20,22 @@ library(tidyverse)
 ```
 
 # Obtain species list
+For groups with more than 1000 species expected, see below
 ```{r}
 # get the GBIF ID first, as done in the exercise from day 1
-ID<- taxize::get_gbifid_("Ixodidae", method="backbone")%>% 
+ID<- taxize::get_gbifid_("Peperomia", method="backbone")%>% 
   bind_rows() %>% # get_gbifid_ returns a list, convert to data.frame
   filter(matchtype == "EXACT" & status == "ACCEPTED") # filter data
 
 # get all species with in this taxon
 # the donstream function will find species for you
 splist <- downstream(sci_id = ID$usagekey,
+                     method = "lookup",
                      db = "gbif",
                      downto = "species",
                      intermediate = FALSE,
-                     rows = NA)[[1]]
+                     rows = NA, 
+                     limit = 1000)[[1]]
 
 # You may want to remove certain species from the list again
 splist <- splist %>% 
@@ -41,3 +44,54 @@ splist <- splist %>%
 # write to disk
 write_csv(splist, "species_list.csv")
 ```
+
+
+# For large taxa with > 1000 species expected
+There is a limit of 1000 names to be returned from downstream for GBIF. For larger groups you need to use multiple queries with the `at` argument.
+
+```{r}
+# get the GBIF ID first, as done in the exercise from day 1
+ID<- taxize::get_gbifid_("Peperomia", method="backbone")%>% 
+  bind_rows() %>% # get_gbifid_ returns a list, convert to data.frame
+  filter(matchtype == "EXACT" & status == "ACCEPTED") # filter data
+
+# get all species with in this taxon
+# the donstream function will find species for you
+
+expected_species_number <- 1900
+
+splist <- data.frame()
+start <- 1
+
+while(start < expected_species_number){
+ print(start)
+  sub <- gbif_downstream(id = ID$usagekey,
+                     downto = "species",
+                     intermediate = FALSE,
+                     start = start,
+                     rows = NA, 
+                     limit = start + 1000)
+  splist <- bind_rows(splist, sub)
+  
+  start <- start + 1000
+}
+
+#count the number of entries returned
+nrow(splist)
+
+# some names are duplicated, potentially because they refer to different subspecies. 
+# If you want you can remove the duplicated names
+splist <- splist %>% 
+  distinct(name, .keep_all = TRUE)
+
+#count the number of unique species names returned
+nrow(splist)
+
+# write to disk
+write_csv(splist, "species_list.csv")
+
+```
+
+
+
+
