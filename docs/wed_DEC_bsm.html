@@ -524,7 +524,8 @@ save(ana_events_tables, file = &quot;example_data/bombacoideae_BSMana_events_tab
 <div id="calculate-the-number-of-dispersal-through-time" class="section level2">
 <h2>Calculate the number of dispersal through time</h2>
 <p>The following function calculates the number of estimated dispersals through time relative to the total branch length across time bins. The function requires the <code>BSM_output</code> and <code>res</code> objects created in the previous steps. Additionally you can adjust the max age (based on the root age of your tree) and the bin size.</p>
-<pre class="r"><code>count_dispersal_events &lt;- function(BSM_output, res, max_age = 25, bin_size = 1, FUN = mean) {
+<pre class="r"><code>count_dispersal_events &lt;- function(BSM_output, res, max_age = 25, bin_size = 1, 
+    FUN = mean) {
     resolution &lt;- bin_size
     tr &lt;- read.tree(res$inputs$trfn)
     
@@ -538,23 +539,28 @@ save(ana_events_tables, file = &quot;example_data/bombacoideae_BSMana_events_tab
     labels &lt;- rev((breaks + resolution/2)[-1])
     
     angen &lt;- lapply(ana_events_tables, function(k) {
-        out &lt;- k %&gt;% dplyr::select(abs_event_time, event_type, event_txt, dispersal_to) %&gt;% mutate(bin = cut(abs_event_time, breaks = breaks, labels = labels)) %&gt;% 
-            mutate(from = str_split_fixed(event_txt, n = 2, pattern = &quot;-&gt;&quot;)[, 1]) %&gt;% mutate(sdb_efb = ifelse(!grepl(&quot;W&quot;, from) &amp; grepl(&quot;W&quot;, dispersal_to), 1, 0)) %&gt;% 
-            mutate(efb_sdb = ifelse(from == &quot;W&quot; &amp; (grepl(&quot;D&quot;, dispersal_to) | grepl(&quot;S&quot;, dispersal_to)), 1, 0))
+        out &lt;- k %&gt;% dplyr::select(abs_event_time, event_type, event_txt, dispersal_to) %&gt;% 
+            mutate(bin = cut(abs_event_time, breaks = breaks, labels = labels)) %&gt;% 
+            mutate(from = str_split_fixed(event_txt, n = 2, pattern = &quot;-&gt;&quot;)[, 
+                1]) %&gt;% mutate(sdb_efb = ifelse(!grepl(&quot;W&quot;, from) &amp; grepl(&quot;W&quot;, 
+            dispersal_to), 1, 0)) %&gt;% mutate(efb_sdb = ifelse(from == &quot;W&quot; &amp; (grepl(&quot;D&quot;, 
+            dispersal_to) | grepl(&quot;S&quot;, dispersal_to)), 1, 0))
         return(out)
     })
     
     
     # count events
     disps &lt;- lapply(angen, function(k) {
-        out &lt;- k %&gt;% filter(event_type == &quot;d&quot;) %&gt;% group_by(bin, dispersal_to) %&gt;% summarize(abs_count = n()) %&gt;% ungroup() %&gt;% mutate(bin = parse_number(as.character(bin)))
+        out &lt;- k %&gt;% filter(event_type == &quot;d&quot;) %&gt;% group_by(bin, dispersal_to) %&gt;% 
+            summarize(abs_count = n()) %&gt;% ungroup() %&gt;% mutate(bin = parse_number(as.character(bin)))
         
         fram &lt;- expand_grid(bin = labels, dispersal_to = area_labels)
         out &lt;- left_join(fram, out, by = c(&quot;dispersal_to&quot;, &quot;bin&quot;)) %&gt;% replace_na(list(abs_count = 0))
     })
     
-    disps &lt;- bind_rows(disps, .id = &quot;SM&quot;) %&gt;% group_by(bin, dispersal_to) %&gt;% summarize(lower = quantile(abs_count, probs = 0.025), avg = FUN(abs_count), upper = quantile(abs_count, 
-        probs = 0.975))
+    disps &lt;- bind_rows(disps, .id = &quot;SM&quot;) %&gt;% group_by(bin, dispersal_to) %&gt;% 
+        summarize(lower = quantile(abs_count, probs = 0.025), avg = FUN(abs_count), 
+            upper = quantile(abs_count, probs = 0.975))
     
     
     disps &lt;- disps[which(disps[, 5] &gt; 0), ]
@@ -579,7 +585,8 @@ save(ana_events_tables, file = &quot;example_data/bombacoideae_BSMana_events_tab
     }
     brls &lt;- data.frame(milgaps_mod)
     # 
-    rescaled_disps &lt;- left_join(disps, brls, by = c(bin = &quot;time&quot;)) %&gt;% mutate(lower = lower/tot_brl) %&gt;% mutate(avg = avg/tot_brl) %&gt;% mutate(upper = upper/tot_brl)
+    rescaled_disps &lt;- left_join(disps, brls, by = c(bin = &quot;time&quot;)) %&gt;% mutate(lower = lower/tot_brl) %&gt;% 
+        mutate(avg = avg/tot_brl) %&gt;% mutate(upper = upper/tot_brl)
     rescaled_disps[, 1] &lt;- -rescaled_disps[, 1]
     return(rescaled_disps)
     
@@ -588,7 +595,8 @@ save(ana_events_tables, file = &quot;example_data/bombacoideae_BSMana_events_tab
 <pre class="r"><code>relative_dispersals &lt;- count_dispersal_events(BSM_output, res, max_age = 25, bin_size = 1)
 
 # plot results
-p &lt;- ggplot() + geom_point(data = relative_dispersals, aes(x = bin, y = avg, color = dispersal_to)) + geom_line(data = relative_dispersals, aes(x = bin, y = avg, color = dispersal_to)) + 
+p &lt;- ggplot() + geom_point(data = relative_dispersals, aes(x = bin, y = avg, color = dispersal_to)) + 
+    geom_line(data = relative_dispersals, aes(x = bin, y = avg, color = dispersal_to)) + 
     theme_bw()
 p + labs(x = &quot;Time (Ma)&quot;, y = &quot;Relative number of dispersals&quot;)</code></pre>
 </div>

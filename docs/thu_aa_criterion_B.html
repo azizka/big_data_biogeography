@@ -509,8 +509,11 @@ library(jsonlite)</code></pre>
 <h2>1. ConR automated conservation assessment</h2>
 <p>You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR.</p>
 <pre class="r"><code># Format input data for ConR
-inp &lt;- records %&gt;% filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% dplyr::select(ddlat = decimalLatitude, ddlon = decimalLongitude, 
-    tax = species)
+records &lt;- read_csv(&quot;example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv&quot;)
+
+inp &lt;- records %&gt;% # filter(!species %in% c(&#39;Adansonia digitata&#39;, &#39;Bombax ceiba&#39;, &#39;Ceiba pentandra&#39;)) %&gt;%
+filter(decimallongitude &lt; 60 &amp; decimallogitude &gt; -110)  #limit to the natural range of spces, since ranges &gt; 180 degrees are not feasible
+dplyr::select(ddlat = decimalLatitude, ddlon = decimalLongitude, tax = species)
 
 # Preliminary assessment
 ev &lt;- IUCN.eval(inp)

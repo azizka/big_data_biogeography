@@ -474,12 +474,14 @@ library(&quot;phytools&quot;)</code></pre>
 <h1>Prep data</h1>
 <p>Since the GoeSSE model only allows for 2 areas the input data might need to be modified by merging some of the areas.</p>
 <p>Define which areas should be merged</p>
-<pre class="r"><code>data_SPGC &lt;- read.csv(&quot;example_data/bombacoideae_biome_classification_details.csv&quot;, row.names = 1)
+<pre class="r"><code>data_SPGC &lt;- read.csv(&quot;example_data/bombacoideae_biome_classification_details.csv&quot;, 
+    row.names = 1)
 columns_areaA = c(1, 3)
 columns_areaB = c(2, 4, 5)
 
 geosse_areas &lt;- comb_areas(data_SPGC, columns_areaA, columns_areaB)
-write.table(geosse_areas, file = &quot;example_data/traitGeoSSE_owndataconverted.txt&quot;, sep = &quot;\t&quot;, row.names = F, quote = F)</code></pre>
+write.table(geosse_areas, file = &quot;example_data/traitGeoSSE_owndataconverted.txt&quot;, 
+    sep = &quot;\t&quot;, row.names = F, quote = F)</code></pre>
 </div>
 <div id="setup-an-analysis" class="section level1">
 <h1>Setup an analysis</h1>
@@ -494,7 +496,8 @@ write.table(geosse_areas, file = &quot;example_data/traitGeoSSE_owndataconverted
 <p>Define output file name</p>
 <pre class="r"><code>mcmc.log = &quot;bombacoideae_geosse.log&quot;</code></pre>
 <p>Run the analysis (you can increase the number of iterations to run a longer analysis and improve convergence)</p>
-<pre class="r"><code>run_mcmc_SSE(tree, range.data, model = &quot;geosse&quot;, outfile = mcmc.log, iterations = 10000, rho = sampling_fractions)</code></pre>
+<pre class="r"><code>run_mcmc_SSE(tree, range.data, model = &quot;geosse&quot;, outfile = mcmc.log, iterations = 10000, 
+    rho = sampling_fractions)</code></pre>
 </div>
 <div id="process-and-plot-output" class="section level1">
 <h1>Process and plot output</h1>
@@ -521,7 +524,8 @@ hist(delta_extinction)</code></pre>
 <div id="run-on-multiple-trees" class="section level1">
 <h1>Run on multiple trees</h1>
 <p>If provided with a tree object that includes multiple trees (class “multiPhylo”) the MCMC can run sequentially on different trees to account for phylogenetic uncertainty. The <code>burnin</code> defines how many initial MCMC iterations should be discarded (i.e. not saved in the log file) for each tree and <code>nTREES</code> defines on how many trees the analysis is run.</p>
-<pre class="r"><code>run_mcmc_SSE(trees, range.data, model = &quot;geosse&quot;, outfile = &quot;geosse.log&quot;, iterations = 10000, nTREES = 5, burnin = 100)</code></pre>
+<pre class="r"><code>run_mcmc_SSE(trees, range.data, model = &quot;geosse&quot;, outfile = &quot;geosse.log&quot;, iterations = 10000, 
+    nTREES = 5, burnin = 100)</code></pre>
 </div>
 
 

@@ -488,7 +488,8 @@ rownames(splist) &lt;- splist$species
 # Load the large-scale phylogeny
 tree &lt;- read.tree(&quot;example_data/day3_historical_biogeography/VascularPlants.tre&quot;)
 
-# Check if the spelling of the names is identical, e.g. if the epitheton is preceeded by a space or an underscore
+# Check if the spelling of the names is identical, e.g. if the epitheton is
+# preceeded by a space or an underscore
 head(splist$species)
 head(tree$tip.label)
 
@@ -535,7 +536,8 @@ write.tree(canidae_tree, &quot;inst/canidae_phylogeny.newick&quot;)</code></pre>
 <div id="taxon-specific-bioregions" class="section level3">
 <h3>Taxon-specific bioregions</h3>
 <pre class="r"><code># Load cleaned occurences
-occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv&quot;) %&gt;% as.data.frame()
+occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv&quot;) %&gt;% 
+    as.data.frame()
 
 # remove species not in the phylogeny
 tr &lt;- read.tree(&quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick&quot;)
@@ -557,8 +559,9 @@ class[class &gt; 0] &lt;- 1
 class$comb &lt;- apply(class, 1, function(x) paste(x, collapse = &quot;&quot;))
 
 class &lt;- dplyr::select(class, comb)
-# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and
-# then in brackets a one latter code for each area
+# write to disk Here you need to adapt the header, the first number is the
+# number of tips in your phylogeny, the second number is the number of
+# bioregions, and then in brackets a one latter code for each area
 
 sink(&quot;bombacoideae_area_classification.txt&quot;)
 cat(&quot;38 8 (A B C D E F G H )\n&quot;)
@@ -594,8 +597,9 @@ write.csv(class, &quot;bombacoideae_biome_classification_details.csv&quot;)
 class$comb &lt;- apply(class, 1, function(x) paste(x, collapse = &quot;&quot;))
 
 class &lt;- dplyr::select(class, comb)
-# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and
-# then in brackets a one latter code for each area
+# write to disk Here you need to adapt the header, the first number is the
+# number of tips in your phylogeny, the second number is the number of
+# bioregions, and then in brackets a one latter code for each area
 
 sink(&quot;example_data/bombacoideae_biome_classification.txt&quot;)
 cat(&quot;38 5 (A B C D E)\n&quot;)

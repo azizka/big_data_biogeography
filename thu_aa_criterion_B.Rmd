@@ -60,8 +60,11 @@ You can use the ConR package for a preliminary conservation assessment orientate
 
 ```{r, eval=FALSE}
 # Format input data for ConR
+records <- read_csv("example_data/day4_conservation_assessments/cleaned_occurrences_bombacoideae.csv")
+
 inp <- records%>%
-  filter(!species %in% c("Adansonia digitata", "Bombax ceiba", "Ceiba pentandra")) %>% 
+  #filter(!species %in% c("Adansonia digitata", "Bombax ceiba", "Ceiba pentandra")) %>% 
+  filter(decimallongitude < 60 & decimallogitude > -110) #limit to the natural range of spces, since ranges > 180 degrees are not feasible
   dplyr::select(ddlat = decimalLatitude,
                 ddlon = decimalLongitude, 
                 tax = species)
