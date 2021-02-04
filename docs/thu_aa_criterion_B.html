@@ -534,7 +534,7 @@ ev</code></pre>
 <h2>2. Comparing automated assessment and IUCN status</h2>
 <p>Now we can combine the automated assessment with the existing IUCN assessments, to compare them.</p>
 <pre class="r"><code># load IUCN Red List from Day 1
-iucn &lt;- read_csv(&quot;C:/Users/az64mycy/Dropbox (iDiv)/teaching/2021_big_data_biogeography_physalis/example_data/day4_conservation_assessments/bombacoideae_iucn_redlist_assessments.csv&quot;)
+iucn &lt;- read_csv(&quot;example_data/day4_conservation_assessments/bombacoideae_iucn_redlist_assessments.csv&quot;)
 
 out &lt;- ev %&gt;% 
   left_join(iucn,  by = c(&quot;taxa&quot; = &quot;scientific_name&quot;))
