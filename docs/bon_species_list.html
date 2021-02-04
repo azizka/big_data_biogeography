@@ -464,18 +464,21 @@ library(tidyverse)</code></pre>
 </div>
 <div id="obtain-species-list" class="section level1">
 <h1>Obtain species list</h1>
+<p>For groups with more than 1000 species expected, see below</p>
 <pre class="r"><code># get the GBIF ID first, as done in the exercise from day 1
-ID&lt;- taxize::get_gbifid_(&quot;Ixodidae&quot;, method=&quot;backbone&quot;)%&gt;% 
+ID&lt;- taxize::get_gbifid_(&quot;Peperomia&quot;, method=&quot;backbone&quot;)%&gt;% 
   bind_rows() %&gt;% # get_gbifid_ returns a list, convert to data.frame
   filter(matchtype == &quot;EXACT&quot; &amp; status == &quot;ACCEPTED&quot;) # filter data
 
 # get all species with in this taxon
 # the donstream function will find species for you
 splist &lt;- downstream(sci_id = ID$usagekey,
+                     method = &quot;lookup&quot;,
                      db = &quot;gbif&quot;,
                      downto = &quot;species&quot;,
                      intermediate = FALSE,
-                     rows = NA)[[1]]
+                     rows = NA, 
+                     limit = 1000)[[1]]
 
 # You may want to remove certain species from the list again
 splist &lt;- splist %&gt;% 
@@ -483,6 +486,50 @@ splist &lt;- splist %&gt;%
 
 # write to disk
 write_csv(splist, &quot;species_list.csv&quot;)</code></pre>
+</div>
+<div id="for-large-taxa-with-1000-species-expected" class="section level1">
+<h1>For large taxa with &gt; 1000 species expected</h1>
+<p>There is a limit of 1000 names to be returned from downstream for GBIF. For larger groups you need to use multiple queries with the <code>at</code> argument.</p>
+<pre class="r"><code># get the GBIF ID first, as done in the exercise from day 1
+ID&lt;- taxize::get_gbifid_(&quot;Peperomia&quot;, method=&quot;backbone&quot;)%&gt;% 
+  bind_rows() %&gt;% # get_gbifid_ returns a list, convert to data.frame
+  filter(matchtype == &quot;EXACT&quot; &amp; status == &quot;ACCEPTED&quot;) # filter data
+
+# get all species with in this taxon
+# the donstream function will find species for you
+
+expected_species_number &lt;- 1900
+
+splist &lt;- data.frame()
+start &lt;- 1
+
+while(start &lt; expected_species_number){
+ print(start)
+  sub &lt;- gbif_downstream(id = ID$usagekey,
+                     downto = &quot;species&quot;,
+                     intermediate = FALSE,
+                     start = start,
+                     rows = NA, 
+                     limit = start + 1000)
+  splist &lt;- bind_rows(splist, sub)
+  
+  start &lt;- start + 1000
+}
+
+#count the number of entries returned
+nrow(splist)
+
+# some names are duplicated, potentially because they refer to different subspecies. 
+# If you want you can remove the duplicated names
+splist &lt;- splist %&gt;% 
+  distinct(name, .keep_all = TRUE)
+
+#count the number of unique species names returned
+nrow(splist)
+
+# write to disk
+write_csv(splist, &quot;species_list.csv&quot;)
+</code></pre>
 </div>
 
 

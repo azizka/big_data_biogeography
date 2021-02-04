@@ -483,22 +483,20 @@ library(rredlist)
 
 iucn.key &lt;- &quot;YOUR TOKEN&quot;
 
-splist &lt;- read_csv(&quot;example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv&quot;) %&gt;% 
-  pull(species)
-  
+splist &lt;- read_csv(&quot;example_data/day1_biodiversity_databases/bombacoideae_specieslist.csv&quot;) %&gt;% pull(species)
+
 
 iucn &lt;- data.frame()
 
-#get conservation status from IUCN via the IUCN API
-for(i in 1:length(splist)){
-  print(i)
-  pick &lt;- jsonlite::fromJSON(rl_search_(splist[i], key = iucn.key))$result
-
-  # write.table(pick, &quot;inst/secondary_woodyness_iucn_criteria.txt&quot;, 
-  #             append = T, col.names = F, row.names = F)
-  
-  iucn &lt;-  bind_rows(iucn, pick)
-  Sys.sleep(1)
+# get conservation status from IUCN via the IUCN API
+for (i in 1:length(splist)) {
+    print(i)
+    pick &lt;- jsonlite::fromJSON(rl_search_(splist[i], key = iucn.key))$result
+    
+    # write.table(pick, &#39;inst/secondary_woodyness_iucn_criteria.txt&#39;, append = T, col.names = F, row.names = F)
+    
+    iucn &lt;- bind_rows(iucn, pick)
+    Sys.sleep(1)
 }
 
 # check the data

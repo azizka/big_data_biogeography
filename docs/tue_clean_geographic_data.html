@@ -539,21 +539,17 @@ ggplot()+
 <h2>4. Clean the coordinates based on available meta-data</h2>
 <p>As you cans see there are a some unexpected occurrence locations, outside the current distribution range. We will find out the reasons for this in a minute. In this specific case we could relatively easily get rid of a large number of problematic records based on prior knowledge (we are only interested in records in South America) but we usually do not have this kind of knowledge when dealing with larger datasets, so we will try to get rid of those records in different ways. GBIF data often contain a good number of meta-data that can help to locate problems. First we’ll remove data without coordinates, coordinates with very low precision and the unsuitable data sources. We will remove all records with a precision below 100km as this represent the grain size of many macro-ecological analyses, but the number is somewhat arbitrary and you best chose it based on your downstream analyses. We also exclude fossils as we are interested in recent distributions and records of unknown source, as we might deem them not reliable enough.</p>
 <pre class="r"><code># remove records without coordinates
-dat_cl &lt;- dat%&gt;%
-  filter(!is.na(decimalLongitude))%&gt;%
-  filter(!is.na(decimalLatitude))
+dat_cl &lt;- dat %&gt;% filter(!is.na(decimalLongitude)) %&gt;% filter(!is.na(decimalLatitude))
 
-#remove records with low coordinate precision
+# remove records with low coordinate precision
 hist(dat_cl$coordinateUncertaintyInMeters/1000, breaks = 30)
 
-dat_cl &lt;- dat_cl %&gt;%
-  filter(coordinateUncertaintyInMeters/1000 &lt;= 100 | is.na(coordinateUncertaintyInMeters))
+dat_cl &lt;- dat_cl %&gt;% filter(coordinateUncertaintyInMeters/1000 &lt;= 100 | is.na(coordinateUncertaintyInMeters))
 
-#remove unsuitable data sources, especially fossils
+# remove unsuitable data sources, especially fossils
 table(dat$basisOfRecord)
 
-dat_cl &lt;- filter(dat_cl, basisOfRecord == &quot;HUMAN_OBSERVATION&quot; | basisOfRecord == &quot;OBSERVATION&quot; |
-                         basisOfRecord == &quot;PRESERVED_SPECIMEN&quot; | is.na(basisOfRecord))</code></pre>
+dat_cl &lt;- filter(dat_cl, basisOfRecord == &quot;HUMAN_OBSERVATION&quot; | basisOfRecord == &quot;OBSERVATION&quot; | basisOfRecord == &quot;PRESERVED_SPECIMEN&quot; | is.na(basisOfRecord))</code></pre>
 <p>In the next step we will remove records with suspicious individual counts. GBIF includes few records of absence (individual count = 0 or occurrenceStatus = “ABSENT”) and suspiciously high occurrence counts, which might indicate inappropriate data or data entry problems.</p>
 <pre class="r"><code>#Individual count
 table(dat_cl$individualCount)
@@ -563,46 +559,36 @@ dat_cl &lt;- dat_cl%&gt;%
   filter(individualCount &lt; 99 | is.na(individualCount)) %&gt;% # high counts are not a problem
   filter(occurrenceStatus == &quot;PRESENT&quot;)</code></pre>
 <p>We might also want to exclude very old records, as they are more likely to be unreliable. For instance, records from before the second world war are often very imprecise, especially if they were geo-referenced based on political entities. Additionally old records might be likely from areas where species went extinct (for example due to land-use change).</p>
-<pre class="r"><code>#Age of records
+<pre class="r"><code># Age of records
 table(dat_cl$year)
 
-dat_cl &lt;- dat_cl%&gt;%
-  filter(year &gt; 1945) # remove records from before second world war</code></pre>
+dat_cl &lt;- dat_cl %&gt;% filter(year &gt; 1945)  # remove records from before second world war</code></pre>
 <p>If available we can also use external information in the cleaning process. For instance, in the case of the Bombacoideae, we can exclude all North American and European records, since the group is not occurring their natively.</p>
-<pre class="r"><code>dat_cl &lt;- dat_cl %&gt;% 
-  filter(decimalLatitude &lt; 23) %&gt;% 
-  filter(decimalLongitude &gt; -120)</code></pre>
+<pre class="r"><code>dat_cl &lt;- dat_cl %&gt;% filter(decimalLatitude &lt; 23) %&gt;% filter(decimalLongitude &gt; -120)</code></pre>
 <p>On top of the geographic cleaning, we also want to make sure to only include species level records and records from the right taxon. Taxonomic problems such as spelling mistakes in the names or synonyms can be a severe problem. We’ll not treat taxonomic cleaning here, but check out the <a href="https://ropensci.org/tutorials/taxize_tutorial.html">taxize R package</a> or the <a href="http://tnrs.iplantcollaborative.org/">taxonomic name resolution service</a> for that.</p>
-<pre class="r"><code>table(dat_cl$family) #that looks good
+<pre class="r"><code>table(dat_cl$family)  #that looks good
 
 
-table(dat_cl$taxonRank) # We will only include records identified to species level or below
-dat_cl &lt;- dat_cl%&gt;%
-  filter(taxonRank %in% c(&quot;SPECIES&quot;, &quot;SUBSPECIES&quot;, &quot;VARIETY&quot;) | is.na(taxonRank))</code></pre>
+table(dat_cl$taxonRank)  # We will only include records identified to species level or below
+dat_cl &lt;- dat_cl %&gt;% filter(taxonRank %in% c(&quot;SPECIES&quot;, &quot;SUBSPECIES&quot;, &quot;VARIETY&quot;) | is.na(taxonRank))</code></pre>
 <p>We excluded almost <code>round((nrow(dat) - nrow(dat_cl)) / nrow(dat) * 100, 0)</code> of the initial data points based on metadata! Most of them due to incomplete identification.</p>
 </div>
 <div id="apply-automated-flagging-to-identify-potentially-problematic-records" class="section level2">
 <h2>5. Apply automated flagging to identify potentially problematic records</h2>
 <p>To identify additional problems we will run the automatic flagging algorithm of the CoordinateCleaner package. The <code>clean_coordinates</code> function is a wrapper around a large set of automated cleaning steps to flag errors that are common to biological collections, including: sea coordinates, zero coordinates, coordinate - country mismatches, coordinates assigned to country and province centroids, coordinates within city areas, outlier coordinates and coordinates assigned to biodiversity institutions. You can switch on each test individually using logical flags, modify the sensitivity of most individual tests using the “.rad” arguments, and provide custom gazetteers using the “.ref” arguments. See <code>?clean_coordinates</code> for help. To use the country - coordinate mismatch test we need to convert the country from ISO2 to ISO3 format. Since we work in a coastal area, we use a buffered reference, to avoid flagging records close to the sea.</p>
-<pre class="r"><code>#flag problems
+<pre class="r"><code># flag problems
 dat_cl &lt;- data.frame(dat_cl)
-flags &lt;- clean_coordinates(x = dat_cl, lon = &quot;decimalLongitude&quot;, lat = &quot;decimalLatitude&quot;,
-                          countries = &quot;countryCode&quot;, 
-                          species = &quot;species&quot;,
-                          tests = c(&quot;capitals&quot;, &quot;centroids&quot;, &quot;equal&quot;,&quot;gbif&quot;, 
-                                    &quot;zeros&quot;, &quot;countries&quot;, &quot;seas&quot;),
-                          seas_ref = buffland) # most test are on by default</code></pre>
+flags &lt;- clean_coordinates(x = dat_cl, lon = &quot;decimalLongitude&quot;, lat = &quot;decimalLatitude&quot;, countries = &quot;countryCode&quot;, species = &quot;species&quot;, tests = c(&quot;capitals&quot;, &quot;centroids&quot;, 
+    &quot;equal&quot;, &quot;gbif&quot;, &quot;zeros&quot;, &quot;countries&quot;, &quot;seas&quot;), seas_ref = buffland)  # most test are on by default</code></pre>
 <p>Here an additional <code>sum(flags$.summary)</code> records were flagged! A look at the test summary and plot reveal the major issues.</p>
 <pre class="r"><code>plot(flags, lon = &quot;decimalLongitude&quot;, lat = &quot;decimalLatitude&quot;)</code></pre>
 <div id="for-marine-species" class="section level3">
 <h3>For marine species</h3>
 <p><em>Only for marine groups</em></p>
 <p>The <code>clean_coordinates</code> function with the settings above will flag all records occurring in the sea as potentially problematic. If your taxa of interest includes marine species you may want to keep these occurrences. ONe option is to run clean_coordinates and remove the seas test. However, you may be interested in ONLY retaining records that occur in the sea and REMOVE all records from land (that is the reverse operation as for terrestrial species). Do to so you can reverse the results of the seas test as follows:</p>
-<pre class="r"><code>flags &lt;- flags %&gt;% 
-  #reverse the results of the sea test
-  mutate(.sea = !.sea) %&gt;% 
-  # since flags also contains a summary column for all test, we need to fix this as well. 
-  mutate(.summary = ifelse(rowSums(.[, 13:20]) == 8, TRUE, FALSE))
+<pre class="r"><code>flags &lt;- flags %&gt;% # reverse the results of the sea test
+mutate(.sea = !.sea) %&gt;% # since flags also contains a summary column for all test, we need to fix this as well.
+mutate(.summary = ifelse(rowSums(.[, 13:20]) == 8, TRUE, FALSE))
 
 plot(flags, lon = &quot;decimalLongitude&quot;, lat = &quot;decimalLatitude&quot;)</code></pre>
 <p>After this inspection we can safely remove the flagged records for this tutorial</p>

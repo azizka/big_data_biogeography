@@ -506,19 +506,18 @@ mammals_tree &lt;- read.tree(&quot;example_data/day3_historical_biogeography/mam
 # Check properties (attributes) of the tree object
 str(mammals_tree)
 
-# Extract clade of interest
-# Create an object containing at tip labels
+# Extract clade of interest Create an object containing at tip labels
 species_list &lt;- mammals_tree$tip.label
 
 # find where Canis and Vulpes are in the species list
-dogs  &lt;-  grep(&quot;Canis&quot;,species_list)
-foxes &lt;-  grep(&quot;Vulpes&quot;,species_list)
+dogs &lt;- grep(&quot;Canis&quot;, species_list)
+foxes &lt;- grep(&quot;Vulpes&quot;, species_list)
 
 # find the node corresponding to the MRCA of all canids
 MRCA_Canidae &lt;- getMRCA(mammals_tree, c(dogs, foxes))
 
 # extract Canidae clade
-canidae_tree &lt;- extract.clade(mammals_tree,MRCA_Canidae)
+canidae_tree &lt;- extract.clade(mammals_tree, MRCA_Canidae)
 
 plot(canidae_tree)
 
@@ -526,7 +525,7 @@ plot(canidae_tree)
 axisPhylo()
 
 # plot with smaller font size
-plot(canidae_tree,cex=0.5)
+plot(canidae_tree, cex = 0.5)
 axisPhylo()
 
 write.tree(canidae_tree, &quot;inst/canidae_phylogeny.newick&quot;)</code></pre>
@@ -536,13 +535,11 @@ write.tree(canidae_tree, &quot;inst/canidae_phylogeny.newick&quot;)</code></pre>
 <div id="taxon-specific-bioregions" class="section level3">
 <h3>Taxon-specific bioregions</h3>
 <pre class="r"><code># Load cleaned occurences
-occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv&quot;) %&gt;% 
-  as.data.frame()
+occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_occurrences_cleaned.csv&quot;) %&gt;% as.data.frame()
 
 # remove species not in the phylogeny
 tr &lt;- read.tree(&quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick&quot;)
-occ &lt;- occ %&gt;% 
-  filter(species %in% tr$tip.label)
+occ &lt;- occ %&gt;% filter(species %in% tr$tip.label)
 
 # load bioregions
 area &lt;- readOGR(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;bombacoideae_infomap_shapefile&quot;)
@@ -551,9 +548,7 @@ area &lt;- readOGR(dsn = &quot;example_data/day3_historical_biogeography&quot;, 
 class &lt;- SpGeoCod(x = occ, y = area, areanames = &quot;bioregn&quot;)
 
 # convert to presence-absence
-class &lt;- class$spec_table %&gt;% 
-  as.data.frame() %&gt;% 
-  dplyr::select(-not_classified) 
+class &lt;- class$spec_table %&gt;% as.data.frame() %&gt;% dplyr::select(-not_classified)
 
 # Make sure each species has at least one area
 
@@ -562,8 +557,8 @@ class[class &gt; 0] &lt;- 1
 class$comb &lt;- apply(class, 1, function(x) paste(x, collapse = &quot;&quot;))
 
 class &lt;- dplyr::select(class, comb)
-# write to disk
-# Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and then in brackets a one latter code for each area
+# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and
+# then in brackets a one latter code for each area
 
 sink(&quot;bombacoideae_area_classification.txt&quot;)
 cat(&quot;38 8 (A B C D E F G H )\n&quot;)
@@ -578,22 +573,18 @@ occ &lt;- read_csv(&quot;example_data/day3_historical_biogeography/bombacoideae_
 
 # remove species not in the phylogeny
 tr &lt;- read.tree(&quot;example_data/day3_historical_biogeography/bombacoideae_phylogeny.newick&quot;)
-occ &lt;- occ %&gt;% 
-  filter(species %in% tr$tip.label) %&gt;% 
-  as.data.frame()
+occ &lt;- occ %&gt;% filter(species %in% tr$tip.label) %&gt;% as.data.frame()
 
 # Load biomes
-biom &lt;-readOGR(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;wwf_terr_ecos&quot;)
+biom &lt;- readOGR(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;wwf_terr_ecos&quot;)
 names(biom)
 
 # Classify species
 class &lt;- SpGeoCod(x = occ, y = biom, areanames = &quot;BIOME&quot;)
 
 # convert to presence-absence
-class &lt;- class$spec_table  %&gt;% 
-  # here you can exclude some areas by their name, for isntance marginal areas
-  dplyr::select(-not_classified, -`3`, -`4`, -`5`, -`9`, -`10`, -`98`) %&gt;% 
-  as.data.frame()
+class &lt;- class$spec_table %&gt;% # here you can exclude some areas by their name, for isntance marginal areas
+dplyr::select(-not_classified, -`3`, -`4`, -`5`, -`9`, -`10`, -`98`) %&gt;% as.data.frame()
 
 # adapt to the BioGeoBEARS format
 class[class &gt; 0] &lt;- 1
@@ -603,8 +594,8 @@ write.csv(class, &quot;bombacoideae_biome_classification_details.csv&quot;)
 class$comb &lt;- apply(class, 1, function(x) paste(x, collapse = &quot;&quot;))
 
 class &lt;- dplyr::select(class, comb)
-# write to disk
-# Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and then in brackets a one latter code for each area
+# write to disk Here you need to adapt the header, the first number is the number of tips in your phylogeny, the second number is the number of bioregions, and
+# then in brackets a one latter code for each area
 
 sink(&quot;example_data/bombacoideae_biome_classification.txt&quot;)
 cat(&quot;38 5 (A B C D E)\n&quot;)

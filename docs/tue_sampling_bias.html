@@ -491,9 +491,7 @@ library(sampbias)</code></pre>
 <h1>Tutorial</h1>
 <div id="load-the-example-distribution-data-from-your-data" class="section level2">
 <h2>1. Load the example distribution data from your data</h2>
-<pre class="r"><code>occ &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_malvaceae.csv&quot;)%&gt;%
-  mutate(decimallongitude = decimalLongitude)%&gt;%
-  mutate(decimallatitude = decimalLatitude)</code></pre>
+<pre class="r"><code>occ &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_malvaceae.csv&quot;) %&gt;% mutate(decimallongitude = decimalLongitude) %&gt;% mutate(decimallatitude = decimalLatitude)</code></pre>
 </div>
 <div id="run-sampbias-with-the-default-settings.-samplingbias" class="section level2">
 <h2>2. Run sampbias with the default settings. (SamplingBias)</h2>
@@ -501,7 +499,7 @@ library(sampbias)</code></pre>
 <pre class="r"><code># run sampbias
 bias.out &lt;- calculate_bias(x = occ, res = 1)
 
-#Summarize and visualize the results
+# Summarize and visualize the results
 summary(bias.out)
 plot(bias.out)</code></pre>
 <p>In addition to the input from above, <code>calculate_bias</code> offers options to customize analyses, of which the most important ones are shown in Table 1. See <code>?calculate_bias</code> for a detailed description of all options, and the section “Changing default settings” of the <a href="https://github.com/azizka/sampbias/blob/master/vignettes/Using_the_samp_bias_rpackage.pdf">sampbias tutorial</a> for a description and examples for the “restricted sample” and “inp_raster” options. <strong>It is of special importance to adapt the raster resolution to the extent of the study area via the <code>res</code> or <code>inp_raster</code> options.</strong></p>
@@ -511,15 +509,15 @@ map_bias(proj)</code></pre>
 </div>
 <div id="look-at-the-run-summary-and-visualize-the-results.-how-informative-are-the-results" class="section level2">
 <h2>3. Look at the run summary and visualize the results. How informative are the results?</h2>
-<pre class="r"><code>#summarize results
+<pre class="r"><code># summarize results
 summary(bias.out)
 
-#Visualize
+# Visualize
 plot(bias.out)</code></pre>
 </div>
 <div id="explore-calculate_bias-and-try-to-change-the-relevant-arguments-and-the-study-extent-to-improve-the-results.-summarize-and-visualize-again." class="section level2">
 <h2>4. Explore <code>?calculate_bias</code> and try to change the relevant arguments and the study extent to improve the results. Summarize and visualize again.</h2>
-<pre class="r"><code>?calculate_bias()</code></pre>
+<pre class="r"><code>`?`(calculate_bias())</code></pre>
 </div>
 <div id="explore-the-bio-dem-app-to-explore-the-effect-of-political-factors-on-data-collections-in-your-group." class="section level2">
 <h2>5. Explore the Bio-Dem app to explore the effect of political factors on data collections in your group.</h2>

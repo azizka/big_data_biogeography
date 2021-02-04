@@ -509,11 +509,8 @@ library(jsonlite)</code></pre>
 <h2>1. ConR automated conservation assessment</h2>
 <p>You can use the ConR package for a preliminary conservation assessment orientated on the IUCN Red list Criterion B. This is based on the AOO, EOO, the number of locations and the number of subpopulations. Range reduction is assumed when using ConR.</p>
 <pre class="r"><code># Format input data for ConR
-inp &lt;- records%&gt;%
-  filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% 
-  dplyr::select(ddlat = decimalLatitude,
-                ddlon = decimalLongitude, 
-                tax = species)
+inp &lt;- records %&gt;% filter(!species %in% c(&quot;Adansonia digitata&quot;, &quot;Bombax ceiba&quot;, &quot;Ceiba pentandra&quot;)) %&gt;% dplyr::select(ddlat = decimalLatitude, ddlon = decimalLongitude, 
+    tax = species)
 
 # Preliminary assessment
 ev &lt;- IUCN.eval(inp)
@@ -525,35 +522,18 @@ ev</code></pre>
 <pre class="r"><code># load IUCN Red List from Day 1
 iucn &lt;- read_csv(&quot;example_data/bombacoideae_iucn_redlist_assessments.csv&quot;)
 
-out &lt;- ev %&gt;% 
-  left_join(iucn,  by = c(&quot;taxa&quot; = &quot;scientific_name&quot;))
+out &lt;- ev %&gt;% left_join(iucn, by = c(taxa = &quot;scientific_name&quot;))
 
 # compare the important indices
-test &lt;- out %&gt;% 
-  select(taxa, 
-         automated_eoo = EOO, 
-         automated_AOO = AOO, 
-         automated_Category_CriteriaB = Category_CriteriaB,
-         iucn_eoo = eoo_km2,
-         iucn_aoo = aoo_km2,
-         iucn_year = published_year,
-         iucn_category = category, 
-         iucn_criteria = criteria)
+test &lt;- out %&gt;% select(taxa, automated_eoo = EOO, automated_AOO = AOO, automated_Category_CriteriaB = Category_CriteriaB, iucn_eoo = eoo_km2, iucn_aoo = aoo_km2, iucn_year = published_year, 
+    iucn_category = category, iucn_criteria = criteria)
 
 # plot for easy evaluation
-plo &lt;- test %&gt;% 
-  filter(!is.na(iucn_category)) %&gt;% 
-  mutate(iucn_eoo = parse_numeric(iucn_eoo))
+plo &lt;- test %&gt;% filter(!is.na(iucn_category)) %&gt;% mutate(iucn_eoo = parse_numeric(iucn_eoo))
 
-ggplot(data = plo)+
-  geom_abline(slope = 1, intercept = 0)+
-  geom_point(aes(x = automated_eoo, y = iucn_eoo))+
-  theme_bw()
+ggplot(data = plo) + geom_abline(slope = 1, intercept = 0) + geom_point(aes(x = automated_eoo, y = iucn_eoo)) + theme_bw()
 
-ggplot(data = plo)+
-  geom_abline(slope = 1, intercept = 0)+
-  geom_point(aes(x = automated_AOO, y = iucn_aoo))+
-  theme_bw()
+ggplot(data = plo) + geom_abline(slope = 1, intercept = 0) + geom_point(aes(x = automated_AOO, y = iucn_aoo)) + theme_bw()
 </code></pre>
 </div>
 <div id="write-to-disk" class="section level2">

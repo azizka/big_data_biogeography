@@ -492,17 +492,11 @@ library(rgdal)</code></pre>
 <pre class="r"><code>dat &lt;- read_csv(&quot;example_data/day2_data_quality_and_sampling_bias/cleaned_occurrences_bombacoideae.csv&quot;)
 
 # Visualize
-world.inp  &lt;- map_data(&quot;world&quot;)
+world.inp &lt;- map_data(&quot;world&quot;)
 
-ggplot()+
-  geom_map(data=world.inp, map=world.inp, aes(x=long, y=lat, map_id=region), fill = &quot;grey80&quot;)+
-  xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, na.rm = T))+
-  ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T))+
-  geom_point(data = dat, aes(x = decimalLongitude, y = decimalLatitude),
-             colour = &quot;darkblue&quot;, size = 1)+
-  coord_fixed()+
-  theme_bw()+
-  theme(axis.title = element_blank())</code></pre>
+ggplot() + geom_map(data = world.inp, map = world.inp, aes(x = long, y = lat, map_id = region), fill = &quot;grey80&quot;) + xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, 
+    na.rm = T)) + ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T)) + geom_point(data = dat, aes(x = decimalLongitude, y = decimalLatitude), 
+    colour = &quot;darkblue&quot;, size = 1) + coord_fixed() + theme_bw() + theme(axis.title = element_blank())</code></pre>
 </div>
 <div id="visualize-the-number-of-occurrence-records-and-the-number-of-species-in-a-grid-richnessgrid" class="section level2">
 <h2>2. Visualize the number of occurrence records and the number of species in a grid (<code>RichnessGrid</code>)</h2>
@@ -512,21 +506,14 @@ gocc &lt;- RichnessGrid(dat, type = &quot;abu&quot;)
 
 plot(gocc)
 
-# Or more sofisticated plotting
-# Prepare for plotting
+# Or more sofisticated plotting Prepare for plotting
 plo_gocc &lt;- data.frame(rasterToPoints(gocc))
 
 # Visualize
-ggplot()+
-  geom_map(data = world.inp, map = world.inp, aes(x = long, y = lat, map_id = region), fill = &quot;grey80&quot;)+
-  xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, na.rm = T))+
-  ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T))+
-  geom_raster(data = plo_gocc, aes(x = x, y = y, fill = layer))+
-  #scale_fill_viridis(name = &quot;Species&quot;, direction = -1)+
-  coord_fixed()+
-  theme_bw()+
-  ggtitle(&quot;Number of occurrences&quot;)+
-  theme(axis.title = element_blank())
+ggplot() + geom_map(data = world.inp, map = world.inp, aes(x = long, y = lat, map_id = region), fill = &quot;grey80&quot;) + xlim(min(dat$decimalLongitude, na.rm = T), max(dat$decimalLongitude, 
+    na.rm = T)) + ylim(min(dat$decimalLatitude, na.rm = T), max(dat$decimalLatitude, na.rm = T)) + geom_raster(data = plo_gocc, aes(x = x, y = y, fill = layer)) + 
+    # scale_fill_viridis(name = &#39;Species&#39;, direction = -1)+
+coord_fixed() + theme_bw() + ggtitle(&quot;Number of occurrences&quot;) + theme(axis.title = element_blank())
 
 # The number of species per grid cell
 gri &lt;- RichnessGrid(dat)
@@ -536,14 +523,11 @@ plot(gri)</code></pre>
 <div id="convex-hull-ranges-per-species" class="section level2">
 <h2>3. Convex hull ranges per species</h2>
 <p>Species occurrence records can be sparse for many groups, which is a problem to estimate species richness and for the bioregionalization. As the simplest model of species distribution we can use convex hull to fill the gaps. This will only work for species which range is smaller than 180 degrees longitude.</p>
-<pre class="r"><code>#restrict to SOuth American and African occurrences which are the native range, except for Adansonia gregorii which is native to Autralia
-add &lt;- dat %&gt;% 
-  filter(species == &quot;Adansonia gregorii&quot;)
+<pre class="r"><code># restrict to SOuth American and African occurrences which are the native range, except for Adansonia gregorii which is native to Autralia
+add &lt;- dat %&gt;% filter(species == &quot;Adansonia gregorii&quot;)
 
-dat_native &lt;- dat %&gt;% 
-  filter(decimalLongitude &gt; -110 &amp; decimalLongitude &lt; 60) %&gt;% 
-  filter(species != &quot;Adansonia gregorii&quot;)
-  bind_rows(add)
+dat_native &lt;- dat %&gt;% filter(decimalLongitude &gt; -110 &amp; decimalLongitude &lt; 60) %&gt;% filter(species != &quot;Adansonia gregorii&quot;)
+bind_rows(add)
 
 # Calculate ranges
 ranges &lt;- CalcRange(dat_native)
@@ -552,8 +536,7 @@ ranges &lt;- CalcRange(dat_native)
 plot(ranges)
 
 # Write to working directory
-writeOGR(ranges, dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;range_polygons_bombacoideae&quot;, 
-         driver = &quot;ESRI Shapefile&quot;, overwrite_layer = TRUE)
+writeOGR(ranges, dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;range_polygons_bombacoideae&quot;, driver = &quot;ESRI Shapefile&quot;, overwrite_layer = TRUE)
 </code></pre>
 </div>
 <div id="visualize-species-richness-per-grid-cell-based-on-the-range-polygons." class="section level2">
@@ -568,24 +551,19 @@ plot(r_ri)</code></pre>
 <p>So far we have displayed species richness in a lat/lon projected raster. This is OK to get a feeling for the data, but strictly speaking wrong, since the actuals area of a 1x1 degree cell varies with latitude. So, it is better to use an equal area projection, such as the Lamberts projection.</p>
 <pre class="r"><code># Define projections
 wgs1984 &lt;- CRS(&quot;+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs&quot;)
-behr &lt;- CRS(&#39;+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs&#39;)
+behr &lt;- CRS(&quot;+proj=cea +lon_0=0 +lat_ts=30 +x_0=0 +y_0=0 +datum=WGS84 +ellps=WGS84 +units=m +no_defs&quot;)
 
 # reproject the occurrence records
-pts &lt;- dat[, c(&quot;decimalLongitude&quot;, &quot;decimalLatitude&quot;)]%&gt;%
-  SpatialPoints(proj4string = wgs1984)%&gt;%
-  spTransform(behr)
+pts &lt;- dat[, c(&quot;decimalLongitude&quot;, &quot;decimalLatitude&quot;)] %&gt;% SpatialPoints(proj4string = wgs1984) %&gt;% spTransform(behr)
 
 # create a aqual area template in behrman projection
-be &lt;- raster(ncol = 360, nrow = 142, 
-             xmn = -17367529, xmx = 17367529, 
-             ymn = -6356742, ymx = 7348382,
-             crs = behr)
+be &lt;- raster(ncol = 360, nrow = 142, xmn = -17367529, xmx = 17367529, ymn = -6356742, ymx = 7348382, crs = behr)
 be &lt;- crop(be, extent(pts))
 
 pts &lt;- data.frame(dat$species, coordinates(pts))
 
 # Equal area Occurrence number
-eq_occgri &lt;- RichnessGrid(x= pts, ras = be, type = &quot;abu&quot;)
+eq_occgri &lt;- RichnessGrid(x = pts, ras = be, type = &quot;abu&quot;)
 plot(eq_occgri)
 
 # Equal area speces richness

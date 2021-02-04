@@ -467,11 +467,10 @@ library(viridis)
 library(readxl)
 library(writexl)
 library(rnaturalearth)</code></pre>
-<pre class="r"><code>#load occurrences
+<pre class="r"><code># load occurrences
 dat &lt;- read_csv(file = &quot;example_data/day3_historical_biogeography/cleaned_occurrences_bombacoideae.csv&quot;)
 
-dat &lt;- dat %&gt;%
-  mutate(tax_name = species)
+dat &lt;- dat %&gt;% mutate(tax_name = species)
 
 # load ecoregions
 poly &lt;- st_read(dsn = &quot;example_data/day3_historical_biogeography&quot;, layer = &quot;wwf_terr_ecos&quot;)
@@ -482,100 +481,51 @@ pts &lt;- st_as_sf(dat, coords = c(&quot;decimalLongitude&quot;, &quot;decimalLa
 
 pip &lt;- st_intersection(pts, poly)
 
-out &lt;- pip %&gt;%
-  select(tax_name, ECO_NAME, REALM, BIOME)
+out &lt;- pip %&gt;% select(tax_name, ECO_NAME, REALM, BIOME)
 
 st_geometry(out) &lt;- NULL
 
 # modify ecoregion name to contain the realm
-out &lt;- out %&gt;%
-  mutate(area = paste(ECO_NAME, &quot; (&quot;, REALM, &quot;)&quot;, sep = &quot;&quot;))
+out &lt;- out %&gt;% mutate(area = paste(ECO_NAME, &quot; (&quot;, REALM, &quot;)&quot;, sep = &quot;&quot;))
 
 # write the names of the taxa with occurrences
-sp_occ &lt;- out %&gt;%
-  select(tax_name) %&gt;%
-  distinct() 
+sp_occ &lt;- out %&gt;% select(tax_name) %&gt;% distinct()
 
 # return the number of taxa which we ultimately include in the analyses
-length(unique(out$tax_name)) #74 taxa
+length(unique(out$tax_name))  #74 taxa
 out %&gt;% filter(is.na(tax_name))
 out %&gt;% filter(is.na(area))
 
 # get the number of ecoregions per species
-count &lt;- out %&gt;%
-  select(tax_name, area) %&gt;%
-  distinct() %&gt;%
-  group_by(tax_name) %&gt;%
-  summarize(n_ecoregions = n()) %&gt;%
-  arrange(desc(n_ecoregions))
+count &lt;- out %&gt;% select(tax_name, area) %&gt;% distinct() %&gt;% group_by(tax_name) %&gt;% summarize(n_ecoregions = n()) %&gt;% arrange(desc(n_ecoregions))
 
-#A barchart per ecoregion,, here we only show the top 20 ecoregions!
-eco &lt;- out %&gt;%
-  select(tax_name, area) %&gt;%
-  distinct()%&gt;%
-  group_by(area) %&gt;%
-  summarize(taxa = n()) %&gt;%
-  arrange(desc(taxa)) %&gt;%
-  ungroup() %&gt;%
-  top_n(n =20)
+# A barchart per ecoregion,, here we only show the top 20 ecoregions!
+eco &lt;- out %&gt;% select(tax_name, area) %&gt;% distinct() %&gt;% group_by(area) %&gt;% summarize(taxa = n()) %&gt;% arrange(desc(taxa)) %&gt;% ungroup() %&gt;% top_n(n = 20)
 
 eco %&gt;% filter(is.na(area))
-#order
-ord &lt;- out %&gt;%
-  select(tax_name, area) %&gt;%
-  distinct()%&gt;%
-  group_by(area) %&gt;%
-  summarize(taxa = n()) %&gt;%
-  arrange(taxa) %&gt;%
-  left_join(eco %&gt;%  select(area), by = &quot;area&quot;) %&gt;%
-  select(area, taxa) %&gt;%
-  distinct()
+# order
+ord &lt;- out %&gt;% select(tax_name, area) %&gt;% distinct() %&gt;% group_by(area) %&gt;% summarize(taxa = n()) %&gt;% arrange(taxa) %&gt;% left_join(eco %&gt;% select(area), by = &quot;area&quot;) %&gt;% 
+    select(area, taxa) %&gt;% distinct()
 
-ord%&gt;% filter(is.na(area))
+ord %&gt;% filter(is.na(area))
 ord %&gt;% filter(is.na(taxa))
 
-plo &lt;- eco %&gt;%
-  left_join(out %&gt;% select(area, REALM) %&gt;%  distinct() , by = &quot;area&quot;) %&gt;%
-  mutate(REALM = recode(REALM,
-                        AA = &quot;Australasia&quot;,
-                        NT = &quot;Neotropics&quot;,
-                        `NA` = &quot;Nearctic&quot;,
-                        AT = &quot;Afrotropics&quot;,
-                        IM = &quot;IndoMalay&quot;,
-                        PA = &quot;Paleartic&quot;,
-                        OC = &quot;Oceania&quot;)) %&gt;%
-  mutate(area = factor(area, levels = ord$area))
+plo &lt;- eco %&gt;% left_join(out %&gt;% select(area, REALM) %&gt;% distinct(), by = &quot;area&quot;) %&gt;% mutate(REALM = recode(REALM, AA = &quot;Australasia&quot;, NT = &quot;Neotropics&quot;, `NA` = &quot;Nearctic&quot;, 
+    AT = &quot;Afrotropics&quot;, IM = &quot;IndoMalay&quot;, PA = &quot;Paleartic&quot;, OC = &quot;Oceania&quot;)) %&gt;% mutate(area = factor(area, levels = ord$area))
 
-plo%&gt;% filter(is.na(area))
+plo %&gt;% filter(is.na(area))
 
 # bar chart of taxa per ecoregion
-ggplot()+
-  geom_bar(data = plo, aes(y =area, x = taxa, fill = REALM), stat = &quot;identity&quot;, color = &quot;black&quot;)+
-  scale_fill_brewer(palette = &quot;Set2&quot;)+
-  ylab(&quot;Ecoregion&quot;)+
-  xlab(&quot;Number of taxa&quot;)+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),
-        legend.position = &quot;bottom&quot;,
-        legend.title = element_blank())+
-  guides(fill = guide_legend(nrow = 1))
+ggplot() + geom_bar(data = plo, aes(y = area, x = taxa, fill = REALM), stat = &quot;identity&quot;, color = &quot;black&quot;) + scale_fill_brewer(palette = &quot;Set2&quot;) + ylab(&quot;Ecoregion&quot;) + 
+    xlab(&quot;Number of taxa&quot;) + theme_bw() + theme(panel.grid.minor = element_blank(), legend.position = &quot;bottom&quot;, legend.title = element_blank()) + guides(fill = guide_legend(nrow = 1))
 
 ggsave(file = &quot;output/barchart_ecoregion_richness_realms.pdf&quot;)
 
 
-plo &lt;- plo %&gt;%
-  left_join(out %&gt;% select(area, BIOME) %&gt;%  distinct() , by = &quot;area&quot;)%&gt;%
-  mutate(area = factor(area, levels = ord$area)) 
+plo &lt;- plo %&gt;% left_join(out %&gt;% select(area, BIOME) %&gt;% distinct(), by = &quot;area&quot;) %&gt;% mutate(area = factor(area, levels = ord$area))
 
-ggplot()+
-  geom_bar(data = plo, aes(y =area, x = taxa, fill =as.factor(BIOME)), stat = &quot;identity&quot;, color = &quot;black&quot;)+
-  scale_fill_brewer(palette = &quot;Set2&quot;)+
-  ylab(&quot;Ecoregion&quot;)+
-  xlab(&quot;Number of taxa&quot;)+
-  theme_bw()+
-  theme(panel.grid.minor = element_blank(),
-        legend.position = &quot;bottom&quot;,
-        legend.title = element_blank())
+ggplot() + geom_bar(data = plo, aes(y = area, x = taxa, fill = as.factor(BIOME)), stat = &quot;identity&quot;, color = &quot;black&quot;) + scale_fill_brewer(palette = &quot;Set2&quot;) + ylab(&quot;Ecoregion&quot;) + 
+    xlab(&quot;Number of taxa&quot;) + theme_bw() + theme(panel.grid.minor = element_blank(), legend.position = &quot;bottom&quot;, legend.title = element_blank())
 
 ggsave(file = &quot;output/barchart_ecoregion_richness_biomes.pdf&quot;)</code></pre>
 </div>
